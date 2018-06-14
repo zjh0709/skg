@@ -87,7 +87,7 @@ class Basic_kg(object):
                             {"head": x.head, "tail": x.tail},
                             {"head": x.head, "relation": x.relation, "tail": x.tail, "extend": x.extend})
 
-        with ThreadPoolExecutor(max_workers=8) as executor:
+        with ThreadPoolExecutor(max_workers=16) as executor:
             executor.map(run_one,
                          list(map(lambda x: x["code"], stock)))
 
@@ -105,7 +105,7 @@ class Basic_kg(object):
                             {"head": x.head, "tail": x.tail},
                             {"head": x.head, "relation": x.relation, "tail": x.tail, "extend": x.extend})
 
-        with ThreadPoolExecutor(max_workers=8) as executor:
+        with ThreadPoolExecutor(max_workers=16) as executor:
             executor.map(run_one,
                          list(map(lambda x: x["code"], stock)))
 
@@ -127,7 +127,7 @@ class Basic_kg(object):
                             {"url": x["url"]},
                             x)
 
-        with ThreadPoolExecutor(max_workers=8) as executor:
+        with ThreadPoolExecutor(max_workers=16) as executor:
             executor.map(run_one,
                          list(map(lambda x: x["code"], stock)))
 
