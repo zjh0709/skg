@@ -20,13 +20,14 @@ class Basic_kg(object):
         self.zk_start()
 
     def zk_start(self):
+        node = os.path.join(ZK_ROOT, self.zk_node, "status").replace("\\", "/")
         try:
             self.zk.start()
-            if self.zk.exists(os.path.join(ZK_ROOT, self.zk_node, "status").replace("\\", "/")):
+            if self.zk.exists(node):
                 self.zk.stop()
                 exit("job is still running!")
             else:
-                self.zk.create(path=os.path.join(ZK_ROOT, self.zk_node, "status"),
+                self.zk.create(path=node,
                                value=b"running",
                                ephemeral=True,
                                makepath=True)
@@ -40,7 +41,10 @@ class Basic_kg(object):
             self.zk.stop()
 
     def zk_total(self, num: int):
+        node = os.path.join(ZK_ROOT, self.zk_node, "total").replace("\\", "/")
         if self.zk is not None:
+            if self.zk.exists(node):
+                self.zk.delete(node)
             self.zk.create(path=os.path.join(ZK_ROOT, self.zk_node, "total").replace("\\", "/"),
                            value=str(num).encode(),
                            makepath=True)
