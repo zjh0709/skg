@@ -21,9 +21,6 @@ class Basic_kg(object):
         self.counter = self.zk_counter()
         self.zk_start()
 
-    def __del__(self):
-        self.zk_stop()
-
     def zk_start(self):
         try:
             self.zk.start()
@@ -88,6 +85,7 @@ class Basic_kg(object):
             executor.map(basic_update,
                          map(lambda x: {"code": x["code"]}, data),
                          data)
+        self.zk_stop()
 
     def sina_concept(self):
         stock = self.db.get_collection("basic").find({}, {"_id": 0, "code": 1})
@@ -112,6 +110,7 @@ class Basic_kg(object):
         with ThreadPoolExecutor(max_workers=3) as executor:
             executor.map(run_one,
                          list(map(lambda x: x["code"], stock)))
+        self.zk_stop()
 
     def sina_holder(self):
         stock = self.db.get_collection("basic").find({}, {"_id": 0, "code": 1})
@@ -136,6 +135,7 @@ class Basic_kg(object):
         with ThreadPoolExecutor(max_workers=3) as executor:
             executor.map(run_one,
                          list(map(lambda x: x["code"], stock)))
+        self.zk_stop()
 
     def jrj_product(self):
         stock = self.db.get_collection("basic").find({}, {"_id": 0, "code": 1})
@@ -160,6 +160,7 @@ class Basic_kg(object):
         with ThreadPoolExecutor(max_workers=16) as executor:
             executor.map(run_one,
                          list(map(lambda x: x["code"], stock)))
+        self.zk_stop()
 
     def jrj_holder(self):
         stock = self.db.get_collection("basic").find({}, {"_id": 0, "code": 1})
@@ -184,6 +185,7 @@ class Basic_kg(object):
         with ThreadPoolExecutor(max_workers=16) as executor:
             executor.map(run_one,
                          list(map(lambda x: x["code"], stock)))
+        self.zk_stop()
 
     def jrj_report_topic(self):
         stock = self.db.get_collection("basic").find({}, {"_id": 0, "code": 1})
@@ -214,6 +216,7 @@ class Basic_kg(object):
         with ThreadPoolExecutor(max_workers=16) as executor:
             executor.map(run_one,
                          list(map(lambda x: x["code"], stock)))
+        self.zk_stop()
 
     def jrj_report_content(self, num: int):
         url = self.db.get_collection("article").find({"source": "jrj", "type": "report", "content": {"$exists": False}},
@@ -232,6 +235,7 @@ class Basic_kg(object):
         with ThreadPoolExecutor(max_workers=16) as executor:
             executor.map(run_one,
                          list(map(lambda x: x["url"], url)))
+        self.zk_stop()
 
     @staticmethod
     def run_tushare_basic():
