@@ -174,6 +174,7 @@ class Basic_kg(object):
                             {"head": x.head, "tail": x.tail},
                             {"head": x.head, "relation": x.relation, "tail": x.tail, "extend": x.extend},
                             upsert=True)
+            self.counter += 1
 
         with ThreadPoolExecutor(max_workers=16) as executor:
             executor.map(run_one,
@@ -202,6 +203,7 @@ class Basic_kg(object):
                             {"url": x["url"]},
                             x,
                             upsert=True)
+            self.counter += 1
 
         with ThreadPoolExecutor(max_workers=16) as executor:
             executor.map(run_one,
@@ -220,6 +222,7 @@ class Basic_kg(object):
                         {"url": url_},
                         data,
                         upsert=False)
+            self.counter += 1
 
         with ThreadPoolExecutor(max_workers=16) as executor:
             executor.map(run_one,
