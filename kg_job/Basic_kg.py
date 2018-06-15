@@ -136,7 +136,8 @@ class Basic_kg(object):
                                                      {"_id": 0, "url": 1}).limit(20)
 
         def run_one(url_: str):
-            print(url_)
+            data = jrj.get_report_content(url_)
+            print(data)
 
         with ThreadPoolExecutor(max_workers=16) as executor:
             executor.map(run_one,
