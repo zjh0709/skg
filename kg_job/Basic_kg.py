@@ -13,7 +13,8 @@ class Basic_kg(object):
         self.client = pymongo.MongoClient(host=MONGODB_HOST, port=MONGODB_PORT, connect=False)
         self.db = self.client.get_database(MONGODB_DB)
 
-    def update(self, collection_name, spec, document, upsert=True):
+    def update(self, collection_name: str, spec: dict, document: dict, upsert=True):
+        document.setdefault("timestamp", int(time.time()*1000))
         self.db.get_collection(collection_name).update(spec, {"$set": document}, upsert)
         logging.info(spec)
 

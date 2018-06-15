@@ -1,5 +1,6 @@
 import argparse
 import datetime
+import logging
 from kg_job.Basic_kg import Basic_kg
 
 
@@ -11,6 +12,7 @@ if __name__ == "__main__":
     ap.add_argument("-d", "--date", help=today, required=False, default=today)
     ap.add_argument("-n", "--num", help="", required=False)
     args = ap.parse_args()
+    logging.info("mission start.")
     if args.action == "basic":
         Basic_kg.run_tushare_basic()
     elif args.action == "concept" and args.source == "sina":
@@ -23,3 +25,5 @@ if __name__ == "__main__":
         Basic_kg.run_jrj_report_topic()
     elif args.action == "report-content" and args.source == "jrj":
         Basic_kg.run_jrj_report_content(int(args.num) if args.num is not None else 20)
+
+    logging.info("mission complete.")
