@@ -14,7 +14,7 @@ class Basic_kg(object):
         self.db = self.client.get_database(MONGODB_DB)
 
     def update(self, collection_name, spec, document, upsert=True):
-        self.db.get_collection(collection_name).update(spec, document, upsert)
+        self.db.get_collection(collection_name).update(spec, {"$set": document}, upsert)
         logging.info(spec)
 
     def tushare_basic(self) -> None:
