@@ -21,3 +21,5 @@ if __name__ == "__main__":
         Basic_kg.run_jrj_product()
     elif args.action == "report-topic" and args.source == "jrj":
         Basic_kg.run_jrj_report_topic()
+    elif args.action == "report-content" and args.source == "jrj":
+        Basic_kg.run_jrj_report_content()
