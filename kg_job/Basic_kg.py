@@ -19,7 +19,7 @@ class Basic_kg(object):
         self.zk_counter_node = os.path.join(ZK_ROOT, zk_node, "counter").replace("\\", "/")
         self.zk = KazooClient(hosts=ZK_HOST)
         self.zk_start()
-        self.counter = self.zk_counter()
+        self.counter = self.zk_get_counter()
 
     def zk_start(self):
         try:
@@ -43,7 +43,7 @@ class Basic_kg(object):
                     self.zk.delete(node)
             self.zk.stop()
 
-    def zk_counter(self):
+    def zk_get_counter(self):
         counter = 0
         if self.zk is not None:
             if self.zk.exists(self.zk_counter_node):
@@ -53,7 +53,7 @@ class Basic_kg(object):
             pass
         return counter
 
-    def zk_total(self, num: int):
+    def zk_set_total(self, num: int):
         if self.zk is not None:
             if self.zk.exists(self.zk_total_node):
                 self.zk.delete(self.zk_total_node)
@@ -61,12 +61,10 @@ class Basic_kg(object):
                            value=str(num).encode(),
                            makepath=True)
 
-    def update(self, collection_name: str, spec: dict, document: dict, upsert=True, counter=False):
+    def update(self, collection_name: str, spec: dict, document: dict, upsert=True):
         document.setdefault("timestamp", int(time.time() * 1000))
         self.db.get_collection(collection_name).update(spec, {"$set": document}, upsert)
         logging.info(spec)
-        if counter:
-            self.counter += 1
 
     def tushare_basic(self) -> None:
         entity, relation, data = tu.get_stock_basic()
@@ -90,7 +88,7 @@ class Basic_kg(object):
     def sina_concept(self):
         stock = self.db.get_collection("basic").find({}, {"_id": 0, "code": 1})
         stock = list(stock)
-        self.zk_total(len(stock))
+        self.zk_set_total(len(stock))
 
         def run_one(code: str):
             entity, relation = sina.get_concept(code)
@@ -98,14 +96,13 @@ class Basic_kg(object):
                 self.update("entity",
                             {"name": x.name},
                             {"name": x.name, "type": x.type},
-                            upsert=True,
-                            counter=True)
+                            upsert=True)
             for x in relation:
                 self.update("relation",
                             {"head": x.head, "tail": x.tail},
                             {"head": x.head, "relation": x.relation, "tail": x.tail},
-                            upsert=True,
-                            counter=True)
+                            upsert=True)
+            self.counter += 1
 
         with ThreadPoolExecutor(max_workers=3) as executor:
             executor.map(run_one,
@@ -115,7 +112,7 @@ class Basic_kg(object):
     def sina_holder(self):
         stock = self.db.get_collection("basic").find({}, {"_id": 0, "code": 1})
         stock = list(stock)
-        self.zk_total(len(stock))
+        self.zk_set_total(len(stock))
 
         def run_one(code: str):
             entity, relation = sina.get_holder(code)
@@ -123,14 +120,13 @@ class Basic_kg(object):
                 self.update("entity",
                             {"name": x.name},
                             {"name": x.name, "type": x.type},
-                            upsert=True,
-                            counter=True)
+                            upsert=True)
             for x in relation:
                 self.update("relation",
                             {"head": x.head, "tail": x.tail},
                             {"head": x.head, "relation": x.relation, "tail": x.tail, "extend": x.extend},
-                            upsert=True,
-                            counter=True)
+                            upsert=True)
+            self.counter += 1
 
         with ThreadPoolExecutor(max_workers=3) as executor:
             executor.map(run_one,
@@ -140,7 +136,7 @@ class Basic_kg(object):
     def jrj_product(self):
         stock = self.db.get_collection("basic").find({}, {"_id": 0, "code": 1})
         stock = list(stock)
-        self.zk_total(len(stock))
+        self.zk_set_total(len(stock))
 
         def run_one(code: str):
             entity, relation = jrj.get_product(code)
@@ -148,14 +144,13 @@ class Basic_kg(object):
                 self.update("entity",
                             {"name": x.name},
                             {"name": x.name, "type": x.type},
-                            upsert=True,
-                            counter=True)
+                            upsert=True)
             for x in relation:
                 self.update("relation",
                             {"head": x.head, "tail": x.tail},
                             {"head": x.head, "relation": x.relation, "tail": x.tail, "extend": x.extend},
-                            upsert=True,
-                            counter=True)
+                            upsert=True)
+                self.counter += 1
 
         with ThreadPoolExecutor(max_workers=16) as executor:
             executor.map(run_one,
@@ -165,7 +160,7 @@ class Basic_kg(object):
     def jrj_holder(self):
         stock = self.db.get_collection("basic").find({}, {"_id": 0, "code": 1})
         stock = list(stock)
-        self.zk_total(len(stock))
+        self.zk_set_total(len(stock))
 
         def run_one(code: str):
             entity, relation = jrj.get_holder(code)
@@ -173,14 +168,12 @@ class Basic_kg(object):
                 self.update("entity",
                             {"name": x.name},
                             {"name": x.name, "type": x.type},
-                            upsert=True,
-                            counter=True)
+                            upsert=True)
             for x in relation:
                 self.update("relation",
                             {"head": x.head, "tail": x.tail},
                             {"head": x.head, "relation": x.relation, "tail": x.tail, "extend": x.extend},
-                            upsert=True,
-                            counter=True)
+                            upsert=True)
 
         with ThreadPoolExecutor(max_workers=16) as executor:
             executor.map(run_one,
@@ -190,7 +183,7 @@ class Basic_kg(object):
     def jrj_report_topic(self):
         stock = self.db.get_collection("basic").find({}, {"_id": 0, "code": 1})
         stock = list(stock)
-        self.zk_total(len(stock))
+        self.zk_set_total(len(stock))
 
         def run_one(code: str):
             entity, relation, topic = jrj.get_report_topic(code)
@@ -198,20 +191,17 @@ class Basic_kg(object):
                 self.update("entity",
                             {"name": x.name},
                             {"name": x.name, "type": x.type},
-                            upsert=True,
-                            counter=True)
+                            upsert=True)
             for x in relation:
                 self.update("relation",
                             {"head": x.head, "tail": x.tail},
                             {"head": x.head, "relation": x.relation, "tail": x.tail},
-                            upsert=True,
-                            counter=True)
+                            upsert=True)
             for x in topic:
                 self.update("article",
                             {"url": x["url"]},
                             x,
-                            upsert=True,
-                            counter=True)
+                            upsert=True)
 
         with ThreadPoolExecutor(max_workers=16) as executor:
             executor.map(run_one,
@@ -222,15 +212,14 @@ class Basic_kg(object):
         url = self.db.get_collection("article").find({"source": "jrj", "type": "report", "content": {"$exists": False}},
                                                      {"_id": 0, "url": 1}).limit(num)
         url = list(url)
-        self.zk_total(len(url))
+        self.zk_set_total(len(url))
 
         def run_one(url_: str):
             data = jrj.get_report_content(url_)
             self.update("article",
                         {"url": url_},
                         data,
-                        upsert=False,
-                        counter=True)
+                        upsert=False)
 
         with ThreadPoolExecutor(max_workers=16) as executor:
             executor.map(run_one,
