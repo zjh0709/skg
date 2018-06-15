@@ -13,9 +13,9 @@ class Basic_kg(object):
         self.client = pymongo.MongoClient(host=MONGODB_HOST, port=MONGODB_PORT, connect=False)
         self.db = self.client.get_database(MONGODB_DB)
 
-    def update(self, collection_name, spec, document):
-        self.db.get_collection(collection_name).update(spec, document, True)
-        logging.info(document)
+    def update(self, collection_name, spec, document, upsert=True):
+        self.db.get_collection(collection_name).update(spec, document, upsert)
+        logging.info(spec)
 
     def tushare_basic(self) -> None:
         entity, relation, data = tu.get_stock_basic()
@@ -131,13 +131,16 @@ class Basic_kg(object):
             executor.map(run_one,
                          list(map(lambda x: x["code"], stock)))
 
-    def jrj_report_content(self):
+    def jrj_report_content(self, num: int):
         url = self.db.get_collection("article").find({"source": "jrj", "type": "report", "content": {"$exists": False}},
-                                                     {"_id": 0, "url": 1}).limit(20)
+                                                     {"_id": 0, "url": 1}).limit(num)
 
         def run_one(url_: str):
             data = jrj.get_report_content(url_)
-            print(data)
+            self.update("article",
+                        {"url": url_},
+                        data,
+                        False)
 
         with ThreadPoolExecutor(max_workers=16) as executor:
             executor.map(run_one,
