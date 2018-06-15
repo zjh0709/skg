@@ -14,38 +14,46 @@ class Basic_kg(object):
     def __init__(self, zk_node: str):
         self.client = pymongo.MongoClient(host=MONGODB_HOST, port=MONGODB_PORT, connect=False)
         self.db = self.client.get_database(MONGODB_DB)
-        self.zk_node = zk_node
+        self.zk_status_node = os.path.join(ZK_ROOT, zk_node, "status").replace("\\", "/")
+        self.zk_total_node = os.path.join(ZK_ROOT, zk_node, "total").replace("\\", "/")
+        self.zk_counter_node = os.path.join(ZK_ROOT, zk_node, "counter").replace("\\", "/")
         self.zk = KazooClient(hosts=ZK_HOST)
-        self.counter = self.zk.Counter(os.path.join(ZK_ROOT, self.zk_node, "counter").replace("\\", "/"))
+        self.counter = 0
         self.zk_start()
 
     def zk_start(self):
-        node = os.path.join(ZK_ROOT, self.zk_node, "status").replace("\\", "/")
         try:
             self.zk.start()
-            if self.zk.exists(node):
+            if self.zk.exists(self.zk_status_node):
                 self.zk.stop()
                 exit("job is still running!")
             else:
-                self.zk.create(path=node,
+                self.zk.create(path=self.zk_status_node,
                                value=b"running",
                                ephemeral=True,
                                makepath=True)
         except KazooTimeoutError as e:
             self.zk = None
-            self.counter = 0
             e.__traceback__
 
     def zk_stop(self):
         if self.zk is not None:
+            for node in [self.zk_status_node, self.zk_total_node, self.zk_counter_node]:
+                if self.zk.exists(node):
+                    self.zk.delete(node)
             self.zk.stop()
 
-    def zk_total(self, num: int):
-        node = os.path.join(ZK_ROOT, self.zk_node, "total").replace("\\", "/")
+    def zk_counter(self):
         if self.zk is not None:
-            if self.zk.exists(node):
-                self.zk.delete(node)
-            self.zk.create(path=os.path.join(ZK_ROOT, self.zk_node, "total").replace("\\", "/"),
+            if self.zk.exists(self.zk_counter_node):
+                self.zk.delete(self.zk_counter_node)
+            self.counter = self.zk.Counter(self.zk_counter_node)
+
+    def zk_total(self, num: int):
+        if self.zk is not None:
+            if self.zk.exists(self.zk_total_node):
+                self.zk.delete(self.zk_total_node)
+            self.zk.create(path=self.zk_total_node,
                            value=str(num).encode(),
                            makepath=True)
 
