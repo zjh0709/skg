@@ -14,7 +14,7 @@ def get_news_topic(code: str, page: int = 1) -> tuple:
         topic_url = "http://stock.jrj.com.cn/share,{},ggxw_{}.shtml".format(code, page)
     url_expr = re.compile("http://stock.jrj.com.cn/\d{4}/\d{2}/\d+.shtml")
     r = requests.get(topic_url)
-    r.encoding = "gb2312"
+    r.encoding = "gbk"
     soup = BeautifulSoup(r.text, "html.parser")
     links_div = soup.find_all("a", href=url_expr)
     links = []
@@ -22,7 +22,8 @@ def get_news_topic(code: str, page: int = 1) -> tuple:
         link = {"url": link.get("href"),
                 "title": link.text,
                 "code": code,
-                "source": "jrj"}
+                "source": "jrj",
+                "type": "news"}
         links.append(link)
     page_buttons = soup.find_all("a", href=re.compile("ggxw_\d+.shtml"))
     max_page = 1
@@ -41,7 +42,7 @@ def get_news_topic(code: str, page: int = 1) -> tuple:
 
 def get_news_content(url: str) -> dict:
     r = requests.get(url)
-    r.encoding = "gb2312"
+    r.encoding = "gbk"
     ret = {}
     try:
         soup = BeautifulSoup(r.text, "html.parser")
@@ -161,4 +162,4 @@ def get_holder(code: str):
 
 
 if __name__ == '__main__':
-    print(get_report_content("http://istock.jrj.com.cn/article,yanbao,29871320.html"))
+    print(get_report_content("http://istock.jrj.com.cn/article,yanbao,30078847.html"))

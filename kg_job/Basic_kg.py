@@ -131,7 +131,16 @@ class Basic_kg(object):
             executor.map(run_one,
                          list(map(lambda x: x["code"], stock)))
 
+    def jrj_report_content(self):
+        url = self.db.get_collection("article").find({"source": "jrj", "type": "report", "content": {"$exists": False}},
+                                                     {"_id": 0, "url": 1}).limit(20)
 
+        def run_one(url: str):
+            print(url)
+
+        with ThreadPoolExecutor(max_workers=16) as executor:
+            executor.map(run_one,
+                         list(map(lambda x: x["url"], url)))
     @staticmethod
     def run_tushare_basic():
         kg = Basic_kg()
