@@ -80,11 +80,15 @@ class Basic_kg(object):
             for x in entity:
                 self.update("entity",
                             {"name": x.name},
-                            {"name": x.name, "type": x.type})
+                            {"name": x.name, "type": x.type},
+                            upsert=True,
+                            counter=True)
             for x in relation:
                 self.update("relation",
                             {"head": x.head, "tail": x.tail},
-                            {"head": x.head, "relation": x.relation, "tail": x.tail})
+                            {"head": x.head, "relation": x.relation, "tail": x.tail},
+                            upsert=True,
+                            counter=True)
 
         with ThreadPoolExecutor(max_workers=3) as executor:
             executor.map(run_one,
@@ -100,11 +104,15 @@ class Basic_kg(object):
             for x in entity:
                 self.update("entity",
                             {"name": x.name},
-                            {"name": x.name, "type": x.type})
+                            {"name": x.name, "type": x.type},
+                            upsert=True,
+                            counter=True)
             for x in relation:
                 self.update("relation",
                             {"head": x.head, "tail": x.tail},
-                            {"head": x.head, "relation": x.relation, "tail": x.tail, "extend": x.extend})
+                            {"head": x.head, "relation": x.relation, "tail": x.tail, "extend": x.extend},
+                            upsert=True,
+                            counter=True)
 
         with ThreadPoolExecutor(max_workers=3) as executor:
             executor.map(run_one,
@@ -120,11 +128,15 @@ class Basic_kg(object):
             for x in entity:
                 self.update("entity",
                             {"name": x.name},
-                            {"name": x.name, "type": x.type})
+                            {"name": x.name, "type": x.type},
+                            upsert=True,
+                            counter=True)
             for x in relation:
                 self.update("relation",
                             {"head": x.head, "tail": x.tail},
-                            {"head": x.head, "relation": x.relation, "tail": x.tail, "extend": x.extend})
+                            {"head": x.head, "relation": x.relation, "tail": x.tail, "extend": x.extend},
+                            upsert=True,
+                            counter=True)
 
         with ThreadPoolExecutor(max_workers=16) as executor:
             executor.map(run_one,
@@ -140,11 +152,15 @@ class Basic_kg(object):
             for x in entity:
                 self.update("entity",
                             {"name": x.name},
-                            {"name": x.name, "type": x.type})
+                            {"name": x.name, "type": x.type},
+                            upsert=True,
+                            counter=True)
             for x in relation:
                 self.update("relation",
                             {"head": x.head, "tail": x.tail},
-                            {"head": x.head, "relation": x.relation, "tail": x.tail, "extend": x.extend})
+                            {"head": x.head, "relation": x.relation, "tail": x.tail, "extend": x.extend},
+                            upsert=True,
+                            counter=True)
 
         with ThreadPoolExecutor(max_workers=16) as executor:
             executor.map(run_one,
@@ -160,15 +176,21 @@ class Basic_kg(object):
             for x in entity:
                 self.update("entity",
                             {"name": x.name},
-                            {"name": x.name, "type": x.type})
+                            {"name": x.name, "type": x.type},
+                            upsert=True,
+                            counter=True)
             for x in relation:
                 self.update("relation",
                             {"head": x.head, "tail": x.tail},
-                            {"head": x.head, "relation": x.relation, "tail": x.tail})
+                            {"head": x.head, "relation": x.relation, "tail": x.tail},
+                            upsert=True,
+                            counter=True)
             for x in topic:
                 self.update("article",
                             {"url": x["url"]},
-                            x)
+                            x,
+                            upsert=True,
+                            counter=True)
 
         with ThreadPoolExecutor(max_workers=16) as executor:
             executor.map(run_one,
@@ -185,7 +207,8 @@ class Basic_kg(object):
             self.update("article",
                         {"url": url_},
                         data,
-                        False)
+                        upsert=False,
+                        counter=True)
 
         with ThreadPoolExecutor(max_workers=16) as executor:
             executor.map(run_one,
