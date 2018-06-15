@@ -18,8 +18,11 @@ class Basic_kg(object):
         self.zk_total_node = os.path.join(ZK_ROOT, zk_node, "total").replace("\\", "/")
         self.zk_counter_node = os.path.join(ZK_ROOT, zk_node, "counter").replace("\\", "/")
         self.zk = KazooClient(hosts=ZK_HOST)
-        self.counter = 0
+        self.counter = self.zk_counter()
         self.zk_start()
+
+    def __del__(self):
+        self.zk_stop()
 
     def zk_start(self):
         try:
@@ -44,10 +47,14 @@ class Basic_kg(object):
             self.zk.stop()
 
     def zk_counter(self):
+        counter = 0
         if self.zk is not None:
             if self.zk.exists(self.zk_counter_node):
                 self.zk.delete(self.zk_counter_node)
-            self.counter = self.zk.Counter(self.zk_counter_node)
+            counter = self.zk.Counter(self.zk_counter_node)
+        else:
+            pass
+        return counter
 
     def zk_total(self, num: int):
         if self.zk is not None:
