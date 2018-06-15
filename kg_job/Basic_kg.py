@@ -18,8 +18,8 @@ class Basic_kg(object):
         self.zk_total_node = os.path.join(ZK_ROOT, zk_node, "total").replace("\\", "/")
         self.zk_counter_node = os.path.join(ZK_ROOT, zk_node, "counter").replace("\\", "/")
         self.zk = KazooClient(hosts=ZK_HOST)
-        self.counter = self.zk_counter()
         self.zk_start()
+        self.counter = self.zk_counter()
 
     def zk_start(self):
         try:
