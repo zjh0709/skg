@@ -177,9 +177,9 @@ class Basic_kg(object):
         kg.jrj_report_topic()
 
     @staticmethod
-    def run_jrj_report_content():
+    def run_jrj_report_content(num: int):
         kg = Basic_kg()
-        kg.jrj_report_content()
+        kg.jrj_report_content(num)
 
 
 if __name__ == '__main__':
