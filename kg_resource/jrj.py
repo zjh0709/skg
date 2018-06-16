@@ -47,8 +47,12 @@ def get_news_content(url: str) -> dict:
     try:
         soup = BeautifulSoup(r.text, "html.parser")
         content_div = soup.find("div", class_="texttit_m1")
-        if content_div:
-            ret.setdefault("content", content_div.text.strip())
+        content = ""
+        for d in content_div.find_all(recursive=False):
+            if "class" not in d.attrs:
+                content += d.text.strip()
+        if content != "":
+            ret.setdefault("content", content)
     except Exception as e:
         logging.warning(e)
     return ret
@@ -162,4 +166,4 @@ def get_holder(code: str):
 
 
 if __name__ == '__main__':
-    print(get_news_content("http://stock.jrj.com.cn/2018/03/27231024309150.shtml"))
+    print(get_news_content("http://stock.jrj.com.cn/2018/04/25000024448872.shtml"))
