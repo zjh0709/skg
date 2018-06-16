@@ -150,7 +150,7 @@ class Basic_kg(object):
                             {"head": x.head, "tail": x.tail},
                             {"head": x.head, "relation": x.relation, "tail": x.tail, "extend": x.extend},
                             upsert=True)
-                self.counter += 1
+            self.counter += 1
 
         with ThreadPoolExecutor(max_workers=16) as executor:
             executor.map(run_one,
