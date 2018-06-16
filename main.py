@@ -27,5 +27,7 @@ if __name__ == "__main__":
         Basic_kg.run_jrj_report_content(int(args.num) if args.num is not None else 20)
     elif args.action == "news-topic" and args.source == "jrj":
         Basic_kg.run_jrj_news_topic(args.num is not None)
+    elif args.action == "news-content" and args.source == "jrj":
+        Basic_kg.run_jrj_news_content(int(args.num) if args.num is not None else 20)
 
     logging.info("mission complete.")
