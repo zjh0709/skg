@@ -20,7 +20,6 @@ class Basic_kg(object):
         self.zk = KazooClient(hosts=ZK_HOST)
         self.zk_start()
         self.counter = self.zk_get_counter()
-
         self.threading_num_low = 2
         self.threading_num_high = 6
 
@@ -233,7 +232,7 @@ class Basic_kg(object):
         self.zk_stop()
 
     def jrj_news_topic(self, recover=False):
-        stock = self.db.get_collection("basic").find({}, {"_id": 0, "code": 1}).limit(5)
+        stock = self.db.get_collection("basic").find({}, {"_id": 0, "code": 1})
         stock = list(stock)
         self.zk_set_total(len(stock))
 
@@ -257,6 +256,25 @@ class Basic_kg(object):
         with ThreadPoolExecutor(max_workers=self.threading_num_high) as executor:
             executor.map(run_one,
                          list(map(lambda x: x["code"], stock)))
+        self.zk_stop()
+
+    def jrj_news_content(self, num: int):
+        url = self.db.get_collection("article").find({"source": "jrj", "type": "news", "content": {"$exists": False}},
+                                                     {"_id": 0, "url": 1}).limit(num)
+        url = list(url)
+        self.zk_set_total(len(url))
+
+        def run_one(url_: str):
+            data = jrj.get_news_content(url_)
+            self.update("article",
+                        {"url": url_},
+                        data,
+                        upsert=False)
+            self.counter += 1
+
+        with ThreadPoolExecutor(max_workers=self.threading_num_high) as executor:
+            executor.map(run_one,
+                         list(map(lambda x: x["url"], url)))
         self.zk_stop()
 
     @staticmethod
@@ -298,6 +316,11 @@ class Basic_kg(object):
     def run_jrj_news_topic(recover=False):
         kg = Basic_kg("jrj/news/topic")
         kg.jrj_news_topic(recover)
+
+    @staticmethod
+    def run_jrj_news_content(num: int):
+        kg = Basic_kg("jrj/news/content")
+        kg.jrj_news_content(num)
 
 
 if __name__ == '__main__':

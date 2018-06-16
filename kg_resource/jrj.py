@@ -162,4 +162,4 @@ def get_holder(code: str):
 
 
 if __name__ == '__main__':
-    print(get_news_topic("600597"))
+    print(get_news_content("http://stock.jrj.com.cn/2018/03/27231024309150.shtml"))
