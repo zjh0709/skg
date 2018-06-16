@@ -21,6 +21,9 @@ class Basic_kg(object):
         self.zk_start()
         self.counter = self.zk_get_counter()
 
+        self.threading_num_low = 2
+        self.threading_num_high = 6
+
     def zk_start(self):
         try:
             self.zk.start()
@@ -69,17 +72,17 @@ class Basic_kg(object):
     def tushare_basic(self) -> None:
         entity, relation, data = tu.get_stock_basic()
         entity_update = partial(self.update, "entity")
-        with ThreadPoolExecutor(max_workers=3) as executor:
+        with ThreadPoolExecutor(max_workers=self.threading_num_low) as executor:
             executor.map(entity_update,
                          map(lambda x: {"name": x.name}, entity),
                          map(lambda x: {"name": x.name, "type": x.type}, entity))
         relation_update = partial(self.update, "relation")
-        with ThreadPoolExecutor(max_workers=3) as executor:
+        with ThreadPoolExecutor(max_workers=self.threading_num_low) as executor:
             executor.map(relation_update,
                          map(lambda x: {"head": x.head, "tail": x.tail}, relation),
                          map(lambda x: {"head": x.head, "relation": x.relation, "tail": x.tail}, relation))
         basic_update = partial(self.update, "basic")
-        with ThreadPoolExecutor(max_workers=3) as executor:
+        with ThreadPoolExecutor(max_workers=self.threading_num_low) as executor:
             executor.map(basic_update,
                          map(lambda x: {"code": x["code"]}, data),
                          data)
@@ -104,7 +107,7 @@ class Basic_kg(object):
                             upsert=True)
             self.counter += 1
 
-        with ThreadPoolExecutor(max_workers=3) as executor:
+        with ThreadPoolExecutor(max_workers=self.threading_num_low) as executor:
             executor.map(run_one,
                          list(map(lambda x: x["code"], stock)))
         self.zk_stop()
@@ -128,7 +131,7 @@ class Basic_kg(object):
                             upsert=True)
             self.counter += 1
 
-        with ThreadPoolExecutor(max_workers=3) as executor:
+        with ThreadPoolExecutor(max_workers=self.threading_num_low) as executor:
             executor.map(run_one,
                          list(map(lambda x: x["code"], stock)))
         self.zk_stop()
@@ -152,7 +155,7 @@ class Basic_kg(object):
                             upsert=True)
             self.counter += 1
 
-        with ThreadPoolExecutor(max_workers=16) as executor:
+        with ThreadPoolExecutor(max_workers=self.threading_num_high) as executor:
             executor.map(run_one,
                          list(map(lambda x: x["code"], stock)))
         self.zk_stop()
@@ -176,7 +179,7 @@ class Basic_kg(object):
                             upsert=True)
             self.counter += 1
 
-        with ThreadPoolExecutor(max_workers=16) as executor:
+        with ThreadPoolExecutor(max_workers=self.threading_num_high) as executor:
             executor.map(run_one,
                          list(map(lambda x: x["code"], stock)))
         self.zk_stop()
@@ -205,7 +208,7 @@ class Basic_kg(object):
                             upsert=True)
             self.counter += 1
 
-        with ThreadPoolExecutor(max_workers=16) as executor:
+        with ThreadPoolExecutor(max_workers=self.threading_num_high) as executor:
             executor.map(run_one,
                          list(map(lambda x: x["code"], stock)))
         self.zk_stop()
@@ -224,9 +227,36 @@ class Basic_kg(object):
                         upsert=False)
             self.counter += 1
 
-        with ThreadPoolExecutor(max_workers=16) as executor:
+        with ThreadPoolExecutor(max_workers=self.threading_num_high) as executor:
             executor.map(run_one,
                          list(map(lambda x: x["url"], url)))
+        self.zk_stop()
+
+    def jrj_news_topic(self, recover=False):
+        stock = self.db.get_collection("basic").find({}, {"_id": 0, "code": 1}).limit(5)
+        stock = list(stock)
+        self.zk_set_total(len(stock))
+
+        def run_one(code: str):
+            links, max_page = jrj.get_news_topic(code, 1)
+            for x in links:
+                self.update("article",
+                            {"url": x["url"]},
+                            x,
+                            upsert=True)
+            if recover is True and max_page > 1:
+                for i in range(2, max_page + 1):
+                    links, _ = jrj.get_news_topic(code, 1)
+                    for x in links:
+                        self.update("article",
+                                    {"url": x["url"]},
+                                    x,
+                                    upsert=True)
+            self.counter += 1
+
+        with ThreadPoolExecutor(max_workers=self.threading_num_high) as executor:
+            executor.map(run_one,
+                         list(map(lambda x: x["code"], stock)))
         self.zk_stop()
 
     @staticmethod
@@ -264,6 +294,11 @@ class Basic_kg(object):
         kg = Basic_kg("jrj/report/content")
         kg.jrj_report_content(num)
 
+    @staticmethod
+    def run_jrj_news_topic(recover=False):
+        kg = Basic_kg("jrj/news/topic")
+        kg.jrj_news_topic(recover)
+
 
 if __name__ == '__main__':
-    Basic_kg.run_tushare_basic()
+    Basic_kg.run_jrj_news_topic()
