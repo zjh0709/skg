@@ -58,5 +58,4 @@ if __name__ == '__main__':
         zk.create(ZK_ROOT + "job/stop")
     if not zk.exists(ZK_ROOT + "job/pid"):
         zk.create(ZK_ROOT + "job/pid")
-    with DaemonContext():
-        pass
+    input()
