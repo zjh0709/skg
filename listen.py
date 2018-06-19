@@ -7,6 +7,7 @@ from kg_job import ZK_HOST, ZK_ROOT
 from kg_job.Basic_kg import Basic_kg
 
 from daemon import DaemonContext
+from multiprocessing import Process
 
 
 def run(job):
@@ -31,16 +32,16 @@ def run(job):
 zk = KazooClient(hosts=ZK_HOST)
 
 
-@zk.ChildrenWatch(ZK_ROOT + "start")
+@zk.ChildrenWatch(ZK_ROOT + "job/start")
 def start_watch(children):
     for job in children:
         logging.info(job)
-        zk.delete(ZK_ROOT + "start/" + job)
-        with DaemonContext(detach_process=True):
-            run(job)
+        zk.delete(ZK_ROOT + "job/start/" + job)
+        p = Process(target=run, args=(job,))
+        print(p.pid)
 
 
-@zk.ChildrenWatch(ZK_ROOT + "stop")
+@zk.ChildrenWatch(ZK_ROOT + "job/stop")
 def start_watch(children):
     print(children)
 
@@ -51,4 +52,11 @@ if __name__ == '__main__':
     except KazooTimeoutError as e:
         e.__traceback__
         exit("can't connect zookeeper")
-    input()
+    if not zk.exists(ZK_ROOT + "job/start"):
+        zk.create(ZK_ROOT + "job/start")
+    if not zk.exists(ZK_ROOT + "job/stop"):
+        zk.create(ZK_ROOT + "job/stop")
+    if not zk.exists(ZK_ROOT + "job/pid"):
+        zk.create(ZK_ROOT + "job/pid")
+    with DaemonContext():
+        pass
