@@ -70,21 +70,25 @@ class Basic_kg(object):
 
     def tushare_basic(self) -> None:
         entity, relation, data = tu.get_stock_basic()
+        self.zk_set_total(len(entity)+len(relation)+len(data))
         entity_update = partial(self.update, "entity")
         with ThreadPoolExecutor(max_workers=self.threading_num_low) as executor:
             executor.map(entity_update,
                          map(lambda x: {"name": x.name}, entity),
                          map(lambda x: {"name": x.name, "type": x.type}, entity))
+        self.counter += len(entity)
         relation_update = partial(self.update, "relation")
         with ThreadPoolExecutor(max_workers=self.threading_num_low) as executor:
             executor.map(relation_update,
                          map(lambda x: {"head": x.head, "tail": x.tail}, relation),
                          map(lambda x: {"head": x.head, "relation": x.relation, "tail": x.tail}, relation))
+        self.counter += len(relation)
         basic_update = partial(self.update, "basic")
         with ThreadPoolExecutor(max_workers=self.threading_num_low) as executor:
             executor.map(basic_update,
                          map(lambda x: {"code": x["code"]}, data),
                          data)
+        self.counter += len(data)
         self.zk_stop()
 
     def sina_concept(self):
