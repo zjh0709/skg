@@ -8,6 +8,7 @@ from kg_job.Basic_kg import Basic_kg
 
 import os
 
+
 def run(job):
     if job == "tushare-basic":
         Basic_kg.run_tushare_basic()
@@ -40,7 +41,7 @@ def start_watch(children):
             run(job)
             exit(0)
         else:
-            print(pid)
+            zk.create(ZK_ROOT + "pid/" + job, str(pid).encode())
 
 
 @zk.ChildrenWatch(ZK_ROOT + "stop")
