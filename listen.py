@@ -9,9 +9,7 @@ from kg_job.Basic_kg import Basic_kg
 
 import os
 import signal
-import time
 
-import daemon
 
 def run(job):
     if job == "tushare-basic":
@@ -74,7 +72,5 @@ if __name__ == '__main__':
     if not zk.exists(ZK_ROOT + "pid"):
         zk.create(ZK_ROOT + "pid")
 
-    with daemon.DaemonContext():
-        while True:
-            time.sleep(1)
+    input()
     zk.close()
