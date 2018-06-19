@@ -2,11 +2,13 @@ import logging
 
 from kazoo.client import KazooClient
 from kazoo.handlers.threading import KazooTimeoutError
+from kazoo.exceptions import NoNodeError
 
 from kg_job import ZK_HOST, ZK_ROOT
 from kg_job.Basic_kg import Basic_kg
 
 import os
+import signal
 
 
 def run(job):
@@ -34,7 +36,7 @@ zk = KazooClient(hosts=ZK_HOST)
 @zk.ChildrenWatch(ZK_ROOT + "start")
 def start_watch(children):
     for job in children:
-        logging.info(job)
+        logging.info("start {}".format(job))
         zk.delete(ZK_ROOT + "start/" + job)
         pid = os.fork()
         if pid == 0:
@@ -46,7 +48,13 @@ def start_watch(children):
 
 @zk.ChildrenWatch(ZK_ROOT + "stop")
 def start_watch(children):
-    print(children)
+    for job in children:
+        logging.info("stop {}".format(job))
+        try:
+            pid = int(zk.get(ZK_ROOT + "pid/" + job)[0].decode())
+            os.kill(pid, signal.SIGKILL)
+        except NoNodeError as no_node_err:
+            no_node_err.__traceback__
 
 
 if __name__ == '__main__':
