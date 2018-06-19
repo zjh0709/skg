@@ -6,9 +6,7 @@ from kazoo.handlers.threading import KazooTimeoutError
 from kg_job import ZK_HOST, ZK_ROOT
 from kg_job.Basic_kg import Basic_kg
 
-from daemon import DaemonContext
-from multiprocessing import Process
-
+import os
 
 def run(job):
     if job == "tushare-basic":
@@ -32,16 +30,20 @@ def run(job):
 zk = KazooClient(hosts=ZK_HOST)
 
 
-@zk.ChildrenWatch(ZK_ROOT + "job/start")
+@zk.ChildrenWatch(ZK_ROOT + "start")
 def start_watch(children):
     for job in children:
         logging.info(job)
-        zk.delete(ZK_ROOT + "job/start/" + job)
-        p = Process(target=run, args=(job,))
-        print(p.pid)
+        zk.delete(ZK_ROOT + "start/" + job)
+        pid = os.fork()
+        if pid == 0:
+            run(job)
+            exit(0)
+        else:
+            print(pid)
 
 
-@zk.ChildrenWatch(ZK_ROOT + "job/stop")
+@zk.ChildrenWatch(ZK_ROOT + "stop")
 def start_watch(children):
     print(children)
 
@@ -52,12 +54,11 @@ if __name__ == '__main__':
     except KazooTimeoutError as e:
         e.__traceback__
         exit("can't connect zookeeper")
-    if not zk.exists(ZK_ROOT, "job"):
-        zk.create(ZK_ROOT + "job")
-    if not zk.exists(ZK_ROOT + "job/start"):
-        zk.create(ZK_ROOT + "job/start")
-    if not zk.exists(ZK_ROOT + "job/stop"):
-        zk.create(ZK_ROOT + "job/stop")
-    if not zk.exists(ZK_ROOT + "job/pid"):
-        zk.create(ZK_ROOT + "job/pid")
+    if not zk.exists(ZK_ROOT + "start"):
+        zk.create(ZK_ROOT + "start")
+    if not zk.exists(ZK_ROOT + "stop"):
+        zk.create(ZK_ROOT + "stop")
+    if not zk.exists(ZK_ROOT + "pid"):
+        zk.create(ZK_ROOT + "pid")
     input()
+    zk.close()
