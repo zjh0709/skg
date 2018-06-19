@@ -13,7 +13,7 @@ if __name__ == "__main__":
     ap.add_argument("-n", "--num", help="", required=False)
     args = ap.parse_args()
     logging.info("mission start.")
-    if args.action == "basic":
+    if args.action == "basic" and args.source == "tushare":
         Basic_kg.run_tushare_basic()
     elif args.action == "concept" and args.source == "sina":
         Basic_kg.run_sina_concept()
