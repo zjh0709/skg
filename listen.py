@@ -50,10 +50,11 @@ def start_watch(children):
 def start_watch(children):
     for job in children:
         logging.info("stop {}".format(job))
+        zk.delete(ZK_ROOT + "stop/" + job)
         try:
             pid = int(zk.get(ZK_ROOT + "pid/" + job)[0].decode())
-            os.kill(pid, signal.SIGKILL)
             zk.delete(ZK_ROOT + "pid/" + job)
+            os.kill(pid, signal.SIGKILL)
         except NoNodeError as no_node_err:
             no_node_err.__traceback__
 
