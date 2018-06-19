@@ -53,6 +53,7 @@ def start_watch(children):
         try:
             pid = int(zk.get(ZK_ROOT + "pid/" + job)[0].decode())
             os.kill(pid, signal.SIGKILL)
+            zk.delete(ZK_ROOT + "pid/" + job)
         except NoNodeError as no_node_err:
             no_node_err.__traceback__
 
