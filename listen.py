@@ -47,7 +47,7 @@ def start_watch(children):
 
 
 @zk.ChildrenWatch(ZK_ROOT + "stop")
-def start_watch(children):
+def stop_watch(children):
     for job in children:
         logging.info("stop {}".format(job))
         zk.delete(ZK_ROOT + "stop/" + job)
