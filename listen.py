@@ -36,7 +36,7 @@ def start_watch(children):
     for job in children:
         logging.info(job)
         zk.delete(ZK_ROOT + "start/" + job)
-        with DaemonContext():
+        with DaemonContext(detach_process=True):
             run(job)
 
 
