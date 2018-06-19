@@ -52,6 +52,8 @@ if __name__ == '__main__':
     except KazooTimeoutError as e:
         e.__traceback__
         exit("can't connect zookeeper")
+    if not zk.exists(ZK_ROOT, "job"):
+        zk.create(ZK_ROOT + "job")
     if not zk.exists(ZK_ROOT + "job/start"):
         zk.create(ZK_ROOT + "job/start")
     if not zk.exists(ZK_ROOT + "job/stop"):
