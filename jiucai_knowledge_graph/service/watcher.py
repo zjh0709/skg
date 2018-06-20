@@ -10,6 +10,11 @@ import signal
 
 class JobWatcher(object):
     def __init__(self):
+        self.zk_service_node = ZK_ROOT + "service"
+        self.zk_start_node = ZK_ROOT + "start"
+        self.zk_stop_node = ZK_ROOT + "stop"
+        self.zk_pid_node = ZK_ROOT + "pid"
+        self.zk_node = self.zk_service_node + "/job-watcher"
         self.zk = KazooClient(hosts=ZK_HOST)
         try:
             self.zk.start()
@@ -35,29 +40,44 @@ class JobWatcher(object):
         else:
             pass
 
-    def run(self):
-        @self.zk.ChildrenWatch(ZK_ROOT + "start")
+    def register_service(self):
+        if not self.zk.exists(self.zk_service_node):
+            self.zk.create(self.zk_service_node, b"service")
+        if self.zk.exists(self.zk_node):
+            return False
+        else:
+            self.zk.create(self.zk_node, str(os.getpid()).encode())
+            return True
+
+    def start(self):
+        if not self.register_service():
+            exit("service is already running.")
+
+        @self.zk.ChildrenWatch(self.zk_start_node)
         def start_watch(children):
             for job in children:
                 logging.info("start {}".format(job))
-                self.zk.delete(ZK_ROOT + "start/" + job)
+                self.zk.delete(self.zk_start_node + "/" + job)
                 pid = os.fork()
                 if pid == 0:
                     self.runner(job)
                     exit(0)
                 else:
-                    self.zk.create(ZK_ROOT + "pid/" + job, str(pid).encode())
+                    self.zk.create(self.zk_pid_node + "/" + job, str(pid).encode())
 
-        @self.zk.ChildrenWatch(ZK_ROOT + "stop")
+        @self.zk.ChildrenWatch(self.zk_stop_node)
         def stop_watch(children):
             for job in children:
                 logging.info("stop {}".format(job))
-                self.zk.delete(ZK_ROOT + "stop/" + job)
+                self.zk.delete(self.zk_stop_node + "/" + job)
                 try:
-                    pid = int(self.zk.get(ZK_ROOT + "pid/" + job)[0].decode())
-                    self.zk.delete(ZK_ROOT + "pid/" + job)
+                    pid = int(self.zk.get(self.zk_pid_node + "/" + job)[0].decode())
+                    self.zk.delete(self.zk_pid_node + "/" + job)
                     os.kill(pid, signal.SIGKILL)
                 except NoNodeError as no_node_err:
                     no_node_err.__traceback__
 
-
+    def stop(self):
+        pid = int(self.zk.get(self.zk_node)[0].decode())
+        self.zk.delete(self.zk_node)
+        os.kill(pid, signal.SIGKILL)

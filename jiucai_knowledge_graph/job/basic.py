@@ -1,6 +1,5 @@
 from jiucai_knowledge_graph import MONGODB_HOST, MONGODB_PORT, MONGODB_DB, ZK_HOST, ZK_ROOT
 from jiucai_knowledge_graph.resource import tu, sina, jrj
-import os
 import pymongo
 from kazoo.client import KazooClient
 from kazoo.handlers.threading import KazooTimeoutError
@@ -14,9 +13,10 @@ class BasicJob(object):
     def __init__(self, zk_node: str):
         self.client = pymongo.MongoClient(host=MONGODB_HOST, port=MONGODB_PORT, connect=False)
         self.db = self.client.get_database(MONGODB_DB)
-        self.zk_status_node = os.path.join(ZK_ROOT, zk_node, "status").replace("\\", "/")
-        self.zk_total_node = os.path.join(ZK_ROOT, zk_node, "total").replace("\\", "/")
-        self.zk_counter_node = os.path.join(ZK_ROOT, zk_node, "counter").replace("\\", "/")
+        self.zk_job_node = ZK_ROOT + "job"
+        self.zk_status_node = self.zk_job_node + "/" + zk_node + "/status"
+        self.zk_total_node = self.zk_job_node + "/" + zk_node + "/total"
+        self.zk_counter_node = self.zk_job_node + "/" + zk_node + "/counter"
         self.zk = KazooClient(hosts=ZK_HOST)
         self.zk_start()
         self.counter = self.zk_get_counter()
@@ -30,6 +30,8 @@ class BasicJob(object):
                 self.zk.stop()
                 exit("job is still running!")
             else:
+                if not self.zk.exists(self.zk_job_node):
+                    self.zk.create(self.zk_job_node, b'job')
                 self.zk.create(path=self.zk_status_node,
                                value=b"running",
                                ephemeral=True,
@@ -283,47 +285,47 @@ class BasicJob(object):
 
     @staticmethod
     def run_tushare_basic():
-        kg = BasicJob("tushare/basic")
+        kg = BasicJob("tushare_basic")
         kg.tushare_basic()
 
     @staticmethod
     def run_sina_concept():
-        kg = BasicJob("sina/concept")
+        kg = BasicJob("sina_concept")
         kg.sina_concept()
 
     @staticmethod
     def run_sina_holder():
-        kg = BasicJob("sina/holder")
+        kg = BasicJob("sina_holder")
         kg.sina_holder()
 
     @staticmethod
     def run_jrj_product():
-        kg = BasicJob("jrj/product")
+        kg = BasicJob("jrj_product")
         kg.jrj_product()
 
     @staticmethod
     def run_jrj_holder():
-        kg = BasicJob("jrj/holder")
+        kg = BasicJob("jrj_holder")
         kg.jrj_holder()
 
     @staticmethod
     def run_jrj_report_topic():
-        kg = BasicJob("jrj/report/topic")
+        kg = BasicJob("jrj_report_topic")
         kg.jrj_report_topic()
 
     @staticmethod
     def run_jrj_report_content(num: int):
-        kg = BasicJob("jrj/report/content")
+        kg = BasicJob("jrj_report_content")
         kg.jrj_report_content(num)
 
     @staticmethod
     def run_jrj_news_topic(recover=False):
-        kg = BasicJob("jrj/news/topic")
+        kg = BasicJob("jrj_news_topic")
         kg.jrj_news_topic(recover)
 
     @staticmethod
     def run_jrj_news_content(num: int):
-        kg = BasicJob("jrj/news/content")
+        kg = BasicJob("jrj_news_content")
         kg.jrj_news_content(num)
 
 
