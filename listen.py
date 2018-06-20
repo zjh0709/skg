@@ -1,5 +1,6 @@
 import logging
 
+from daemon.runner import DaemonRunner
 from kazoo.client import KazooClient
 from kazoo.handlers.threading import KazooTimeoutError
 from kazoo.exceptions import NoNodeError
@@ -10,8 +11,9 @@ from kg_job.Basic_kg import Basic_kg
 import os
 import signal
 
+from kg_job.Listen_kg import Listen_kg
 
-
+"""
 def run(job):
     if job == "tushare-basic":
         Basic_kg.run_tushare_basic()
@@ -73,3 +75,7 @@ if __name__ == '__main__':
     if not zk.exists(ZK_ROOT + "pid"):
         zk.create(ZK_ROOT + "pid")
     input()
+"""
+if __name__ == '__main__':
+    daemon_runner = DaemonRunner(Listen_kg())
+    daemon_runner.do_action()
