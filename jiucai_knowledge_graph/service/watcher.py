@@ -3,9 +3,7 @@ from jiucai_knowledge_graph.job.basic import BasicJob
 from kazoo.client import KazooClient
 from kazoo.handlers.threading import KazooTimeoutError
 from kazoo.exceptions import NoNodeError
-from daemon import DaemonContext
 import logging
-import time
 import os
 import signal
 
@@ -62,7 +60,4 @@ class JobWatcher(object):
                 except NoNodeError as no_node_err:
                     no_node_err.__traceback__
 
-        with DaemonContext():
-            while True:
-                time.sleep(1)
 
