@@ -13,10 +13,10 @@ if __name__ == '__main__':
     parser.add_argument("--action", dest="action", help="start|stop")
     args = parser.parse_args()
 
-    if parser.name == "watcher" and parser.action == "start":
+    if args.name == "watcher" and args.action == "start":
         with DaemonContext():
             JobWatcher.start()
             while True:
                 time.sleep(1)
-    elif parser.name == "watcher" and parser.action == "stop":
+    elif args.name == "watcher" and args.action == "stop":
         JobWatcher.stop()
