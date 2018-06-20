@@ -1,9 +1,6 @@
-from kazoo.client import KazooClient
-from kazoo.recipe.counter import Counter
-
-
-zk = KazooClient(hosts="master")
+from jiucai_knowledge_graph.job.basic import BasicJob
 
 
 if __name__ == '__main__':
-    Counter.client
+    BasicJob.run_jrj_holder()
+

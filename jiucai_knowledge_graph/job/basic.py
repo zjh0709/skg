@@ -10,7 +10,7 @@ from functools import partial
 import time
 
 
-class Basic_kg(object):
+class BasicJob(object):
     def __init__(self, zk_node: str):
         self.client = pymongo.MongoClient(host=MONGODB_HOST, port=MONGODB_PORT, connect=False)
         self.db = self.client.get_database(MONGODB_DB)
@@ -283,49 +283,49 @@ class Basic_kg(object):
 
     @staticmethod
     def run_tushare_basic():
-        kg = Basic_kg("tushare/basic")
+        kg = BasicJob("tushare/basic")
         kg.tushare_basic()
 
     @staticmethod
     def run_sina_concept():
-        kg = Basic_kg("sina/concept")
+        kg = BasicJob("sina/concept")
         kg.sina_concept()
 
     @staticmethod
     def run_sina_holder():
-        kg = Basic_kg("sina/holder")
+        kg = BasicJob("sina/holder")
         kg.sina_holder()
 
     @staticmethod
     def run_jrj_product():
-        kg = Basic_kg("jrj/product")
+        kg = BasicJob("jrj/product")
         kg.jrj_product()
 
     @staticmethod
     def run_jrj_holder():
-        kg = Basic_kg("jrj/holder")
+        kg = BasicJob("jrj/holder")
         kg.jrj_holder()
 
     @staticmethod
     def run_jrj_report_topic():
-        kg = Basic_kg("jrj/report/topic")
+        kg = BasicJob("jrj/report/topic")
         kg.jrj_report_topic()
 
     @staticmethod
     def run_jrj_report_content(num: int):
-        kg = Basic_kg("jrj/report/content")
+        kg = BasicJob("jrj/report/content")
         kg.jrj_report_content(num)
 
     @staticmethod
     def run_jrj_news_topic(recover=False):
-        kg = Basic_kg("jrj/news/topic")
+        kg = BasicJob("jrj/news/topic")
         kg.jrj_news_topic(recover)
 
     @staticmethod
     def run_jrj_news_content(num: int):
-        kg = Basic_kg("jrj/news/content")
+        kg = BasicJob("jrj/news/content")
         kg.jrj_news_content(num)
 
 
 if __name__ == '__main__':
-    Basic_kg.run_jrj_news_topic()
+    BasicJob.run_jrj_news_topic()
