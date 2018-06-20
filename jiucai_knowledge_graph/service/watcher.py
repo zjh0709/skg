@@ -7,7 +7,7 @@ import time
 class JobWatcher(object):
     def run(self):
         with DaemonContext():
-            f = open(settings.get("stdout_path"), "w")
-            f.write("{} \n".format(time.ctime()))
-            time.sleep(1)
+            while True:
+                logging.info(time.ctime())
+                time.sleep(1)
 
