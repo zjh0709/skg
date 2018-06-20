@@ -14,7 +14,7 @@ class JobWatcher(object):
         self.zk_start_node = ZK_ROOT + "start"
         self.zk_stop_node = ZK_ROOT + "stop"
         self.zk_pid_node = ZK_ROOT + "pid"
-        self.zk_node = self.zk_service_node + "/job-watcher"
+        self.zk_node = self.zk_service_node + "/job_watcher"
         self.zk = KazooClient(hosts=ZK_HOST)
         try:
             self.zk.start()
@@ -23,19 +23,19 @@ class JobWatcher(object):
             exit("can't connect zookeeper")
 
     def runner(self, job: str):
-        if job == "tushare-basic":
+        if job == "tushare_basic":
             BasicJob.run_tushare_basic()
-        elif job == "jrj-product":
+        elif job == "jrj_product":
             BasicJob.run_jrj_product()
-        elif job == "jrj-holder":
+        elif job == "jrj_holder":
             BasicJob.run_jrj_holder()
-        elif job == "jrj-report-topic":
+        elif job == "jrj_report_topic":
             BasicJob.run_jrj_report_topic()
-        elif job == "jrj-report-content":
+        elif job == "jrj_report_content":
             BasicJob.run_jrj_report_content(10000)
-        elif job == "jrj-news-topic":
+        elif job == "jrj_news_topic":
             BasicJob.run_jrj_news_topic(False)
-        elif job == "jrj-news-content":
+        elif job == "jrj_news_content":
             BasicJob.run_jrj_news_content(10000)
         else:
             pass

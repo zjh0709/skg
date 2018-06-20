@@ -330,4 +330,4 @@ class BasicJob(object):
 
 
 if __name__ == '__main__':
-    BasicJob.run_jrj_news_topic()
+    BasicJob.run_jrj_product()
