@@ -11,6 +11,7 @@ import os
 import signal
 
 
+
 def run(job):
     if job == "tushare-basic":
         Basic_kg.run_tushare_basic()
@@ -71,6 +72,4 @@ if __name__ == '__main__':
         zk.create(ZK_ROOT + "stop")
     if not zk.exists(ZK_ROOT + "pid"):
         zk.create(ZK_ROOT + "pid")
-
     input()
-    zk.close()
