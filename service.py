@@ -12,8 +12,8 @@ if __name__ == '__main__':
 
     if parser.name == "watcher" and parser.action == "start":
         with DaemonContext():
-            job_watcher = JobWatcher()
-            job_watcher.start()
+            JobWatcher.start()
             while True:
                 time.sleep(1)
-
+    elif parser.name == "watcher" and parser.action == "stop":
+        JobWatcher.stop()

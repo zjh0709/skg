@@ -49,7 +49,7 @@ class JobWatcher(object):
             self.zk.create(self.zk_node, str(os.getpid()).encode())
             return True
 
-    def start(self):
+    def run_start(self):
         if not self.register_service():
             exit("service is already running.")
 
@@ -77,7 +77,17 @@ class JobWatcher(object):
                 except NoNodeError as no_node_err:
                     no_node_err.__traceback__
 
-    def stop(self):
+    def run_stop(self):
         pid = int(self.zk.get(self.zk_node)[0].decode())
         self.zk.delete(self.zk_node)
         os.kill(pid, signal.SIGKILL)
+
+    @staticmethod
+    def start():
+        job_watcher = JobWatcher()
+        job_watcher.run_start()
+
+    @staticmethod
+    def stop():
+        job_watcher = JobWatcher()
+        job_watcher.run_stop()
