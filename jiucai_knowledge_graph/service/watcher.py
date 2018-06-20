@@ -81,13 +81,3 @@ class JobWatcher(object):
         pid = int(self.zk.get(self.zk_node)[0].decode())
         self.zk.delete(self.zk_node)
         os.kill(pid, signal.SIGKILL)
-
-    @staticmethod
-    def start():
-        job_watcher = JobWatcher()
-        job_watcher.run_start()
-
-    @staticmethod
-    def stop():
-        job_watcher = JobWatcher()
-        job_watcher.run_stop()

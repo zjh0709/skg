@@ -15,8 +15,10 @@ if __name__ == '__main__':
 
     if args.name == "watcher" and args.action == "start":
         with DaemonContext():
-            JobWatcher.start()
+            job_watcher = JobWatcher()
+            job_watcher.run_start()
             while True:
                 time.sleep(1)
     elif args.name == "watcher" and args.action == "stop":
-        JobWatcher.stop()
+        job_watcher = JobWatcher()
+        job_watcher.run_stop()
