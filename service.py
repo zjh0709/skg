@@ -3,6 +3,7 @@ from daemon import DaemonContext
 import time
 from argparse import ArgumentParser
 import sys
+import logging
 
 
 if __name__ == '__main__':
@@ -14,11 +15,11 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.name == "watcher" and args.action == "start":
+        logging.info("{} {}".format(args.name, args.action))
         with DaemonContext():
-            job_watcher = JobWatcher()
-            job_watcher.run_start()
+            JobWatcher.start()
             while True:
                 time.sleep(1)
     elif args.name == "watcher" and args.action == "stop":
-        job_watcher = JobWatcher()
-        job_watcher.run_stop()
+        logging.info("{} {}".format(args.name, args.action))
+        JobWatcher.stop()
