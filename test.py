@@ -1,6 +1,8 @@
-from jiucai_knowledge_graph.job.basic import BasicJob
+from jiucai_knowledge_graph.service.watcher import JobWatcher
+from daemon.runner import DaemonRunner
 
 
 if __name__ == '__main__':
-    BasicJob.run_jrj_holder()
+    daemon_runner = DaemonRunner(JobWatcher())
+    daemon_runner.do_action()
 
