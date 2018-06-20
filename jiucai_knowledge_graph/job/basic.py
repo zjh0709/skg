@@ -1,5 +1,5 @@
-from kg_job import MONGODB_HOST, MONGODB_PORT, MONGODB_DB, ZK_HOST, ZK_ROOT
-from kg_resource import tu, sina, jrj
+from jiucai_knowledge_graph import MONGODB_HOST, MONGODB_PORT, MONGODB_DB, ZK_HOST, ZK_ROOT
+from jiucai_knowledge_graph.resource import tu, sina, jrj
 import os
 import pymongo
 from kazoo.client import KazooClient
