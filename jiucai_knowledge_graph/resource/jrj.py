@@ -109,7 +109,7 @@ def get_product(code: str):
     url = "http://stock.jrj.com.cn/share,{},zyyw.shtml".format(code)
     entity, relation = [], []
     Entity = namedtuple("Entity", "name type")
-    Relation = namedtuple("Relation", "head relation tail extend")
+    Relation = namedtuple("Relation", "head head_type relation tail tail_type extend")
     r = requests.get(url)
     r.encoding = "gb2312"
     try:
@@ -131,7 +131,7 @@ def get_product(code: str):
                     product_ = td[0].text
                     extend_ = json.dumps({"percent": td[2].text, "rate": td[-1].text})
                     entity.append(Entity(product_, "产品"))
-                    relation.append(Relation(code, "生产", product_, extend_))
+                    relation.append(Relation(code, "股票", "生产", product_, "产品", extend_))
     except Exception as e:
         logging.warning(e)
     return entity, relation
@@ -141,7 +141,7 @@ def get_holder(code: str):
     url = "http://stock.jrj.com.cn/share,{},sdgd.shtml".format(code)
     entity, relation = [], []
     Entity = namedtuple("Entity", "name type")
-    Relation = namedtuple("Relation", "head relation tail extend")
+    Relation = namedtuple("Relation", "head head_type relation tail tail_type extend")
     r = requests.get(url)
     r.encoding = "gb2312"
     try:
@@ -157,7 +157,7 @@ def get_holder(code: str):
                         company_ = td[1].text
                         extend_ = json.dumps({"percent": td[3].text})
                         entity.append(Entity(td[1].text, "公司/基金/个人"))
-                        relation.append(Relation(code, "股东", company_, extend_))
+                        relation.append(Relation(code, "股票", "股东", company_, "公司/基金/个人", extend_))
             else:
                 continue
     except Exception as e:

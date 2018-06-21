@@ -155,8 +155,9 @@ class BasicJob(object):
                             upsert=True)
             for x in relation:
                 self.update("relation",
-                            {"head": x.head, "tail": x.tail},
-                            {"head": x.head, "relation": x.relation, "tail": x.tail, "extend": x.extend},
+                            {"head": x.head, "head_type": x.head_type, "tail": x.tail, "tail_type": x.tail_type},
+                            {"head": x.head, "head_type": x.head_type, "relation": x.relation,
+                             "tail": x.tail, "tail_type": x.tail_type, "extend": x.extend},
                             upsert=True)
             self.counter += 1
 
@@ -179,8 +180,9 @@ class BasicJob(object):
                             upsert=True)
             for x in relation:
                 self.update("relation",
-                            {"head": x.head, "tail": x.tail},
-                            {"head": x.head, "relation": x.relation, "tail": x.tail, "extend": x.extend},
+                            {"head": x.head, "head_type": x.head_type, "tail": x.tail, "tail_type": x.tail_type},
+                            {"head": x.head, "head_type": x.head_type, "relation": x.relation,
+                             "tail": x.tail, "tail_type": x.tail_type, "extend": x.extend},
                             upsert=True)
             self.counter += 1
 
