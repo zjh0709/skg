@@ -59,3 +59,7 @@ class ZkUtil(object):
         except Exception as e:
             e.__traceback__
 
+
+if __name__ == '__main__':
+    zk_uitl = ZkUtil()
+    print(zk_uitl.get_value("/skg/pid/jrj_product"))
