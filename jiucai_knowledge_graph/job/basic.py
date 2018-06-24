@@ -1,6 +1,6 @@
 import os
 import signal
-
+import logging
 from jiucai_knowledge_graph import ZK_ROOT
 from jiucai_knowledge_graph.util.DataUtil import DataUtil
 from jiucai_knowledge_graph.util.ZkUtil import ZkUtil
@@ -19,6 +19,7 @@ class BasicJob(object):
         self.threading_num_high = 6
         if self.zk_util.exists(self.zk_status_path):
             self.zk_util.stop()
+            logging.info("the last job is still running.")
             os.kill(os.getpid(), signal.SIGKILL)
             exit("the last job is still running.")
         else:
