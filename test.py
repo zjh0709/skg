@@ -1,12 +1,6 @@
-from jiucai_knowledge_graph.service.watcher import JobWatcher
-from daemon import DaemonContext
-import time
+from jiucai_knowledge_graph.job.basic import BasicJob
 
 
 if __name__ == '__main__':
-    with DaemonContext():
-        job_watcher = JobWatcher()
-        job_watcher.run()
-        while True:
-            time.sleep(1)
+    BasicJob.run_jrj_product()
 

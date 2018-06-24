@@ -7,20 +7,21 @@ import logging
 import os
 import signal
 
+from jiucai_knowledge_graph.util.ZkUtil import ZkUtil
+
 
 class JobWatcher(object):
     def __init__(self):
-        self.zk_service_node = ZK_ROOT + "service"
-        self.zk_start_node = ZK_ROOT + "start"
-        self.zk_stop_node = ZK_ROOT + "stop"
-        self.zk_pid_node = ZK_ROOT + "pid"
-        self.zk_node = self.zk_service_node + "/job_watcher"
-        self.zk = KazooClient(hosts=ZK_HOST)
-        try:
-            self.zk.start()
-        except KazooTimeoutError as e:
-            e.__traceback__
-            exit("can't connect zookeeper")
+        self.zk_util = ZkUtil()
+        self.zk_service_path = ZK_ROOT + "service/job_watcher"
+        self.zk_start_path = ZK_ROOT + "start"
+        self.zk_stop_path = ZK_ROOT + "stop"
+        self.zk_pid_path = ZK_ROOT + "pid"
+        if self.zk_util.exists(self.zk_service_path):
+            self.zk_util.stop()
+            exit("service is still running")
+        else:
+            self.zk_util.create_ephemeral(self.zk_service_path, os.getpid())
 
     def runner(self, job: str):
         if job == "tushare_basic":
@@ -40,47 +41,37 @@ class JobWatcher(object):
         else:
             pass
 
-    def register_service(self):
-        if not self.zk.exists(self.zk_service_node):
-            self.zk.create(self.zk_service_node, b"service")
-        if self.zk.exists(self.zk_node):
-            return False
-        else:
-            self.zk.create(self.zk_node, str(os.getpid()).encode(), ephemeral=True)
-            return True
-
     def run_start(self):
-        if not self.register_service():
-            exit("service is already running.")
-
-        @self.zk.ChildrenWatch(self.zk_start_node)
+        @self.zk_util.child_watch(self.zk_start_path)
         def start_watch(children):
             for job in children:
                 logging.info("start {}".format(job))
-                self.zk.delete(self.zk_start_node + "/" + job)
+                self.zk_util.delete(self.zk_start_path + "/" + job)
                 pid = os.fork()
                 if pid == 0:
-                    self.runner(job)
+                    # self.runner(job)
+                    print(job)
                     exit(0)
                 else:
-                    self.zk.create(self.zk_pid_node + "/" + job, str(pid).encode())
+                    self.zk_util.create_ephemeral(self.zk_pid_path + "/" + job, pid)
 
-        @self.zk.ChildrenWatch(self.zk_stop_node)
+        @self.zk_util.child_watch(self.zk_stop_path)
         def stop_watch(children):
             for job in children:
                 logging.info("stop {}".format(job))
-                self.zk.delete(self.zk_stop_node + "/" + job)
+                self.zk_util.delete(self.zk_stop_path + "/" + job)
                 try:
-                    pid = int(self.zk.get(self.zk_pid_node + "/" + job)[0].decode())
-                    self.zk.delete(self.zk_pid_node + "/" + job)
+                    pid = int(self.zk_util.get_value(self.zk_pid_path + "/" + job))
                     os.kill(pid, signal.SIGKILL)
-                except NoNodeError as no_node_err:
-                    no_node_err.__traceback__
+                except NoNodeError as e:
+                    e.__traceback__
 
     def run_stop(self):
-        pid = int(self.zk.get(self.zk_node)[0].decode())
-        self.zk.delete(self.zk_node)
-        os.kill(pid, signal.SIGKILL)
+        try:
+            pid = int(self.zk_util.get_value(self.zk_service_path))
+            os.kill(pid, signal.SIGKILL)
+        except Exception as e:
+            e.__traceback__
 
     @staticmethod
     def start():

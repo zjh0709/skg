@@ -7,6 +7,15 @@ import json
 import time
 
 
+def __recognize_entity(entity: str):
+    if len(entity) < 5:
+        return "个人"
+    elif re.search("基金|社保|保险", entity):
+        return "基金"
+    else:
+        return "公司"
+
+
 def get_news_topic(code: str, page: int = 1) -> tuple:
     if page == 1:
         topic_url = "http://stock.jrj.com.cn/share,{},ggxw.shtml".format(code)
@@ -43,25 +52,26 @@ def get_news_topic(code: str, page: int = 1) -> tuple:
 def get_news_content(url: str) -> dict:
     r = requests.get(url)
     r.encoding = "gbk"
-    ret = {}
+    ret = {"url": url}
     try:
         soup = BeautifulSoup(r.text, "html.parser")
         content_div = soup.find("div", class_="texttit_m1")
-        content = ""
+        content = "--"
         for d in content_div.find_all(recursive=False):
             if "class" not in d.attrs:
                 content += d.text.strip()
         if content != "":
             ret.setdefault("content", content)
     except Exception as e:
-        logging.warning(e)
+        e.__traceback__
+        ret.setdefault("content", "--")
     return ret
 
 
 def get_report_topic(code: str) -> tuple:
-    entity, relation, topic = [], [], []
-    Entity = namedtuple("Entity", "name type")
-    Relation = namedtuple("Relation", "head relation tail")
+    nodes, links, topics = [], [], []
+    Node = namedtuple("Node", "name type source")
+    Link = namedtuple("Link", "head link tail source")
     topic_url = "http://stock.jrj.com.cn/action/yanbao/getJiGouGongSiYanBao.jspa?dateInterval=3650&stockCode={}" \
                 "&pn={}&ps={}&_dc={}"
     url_format = "http://istock.jrj.com.cn/article,yanbao,{}.html"
@@ -74,25 +84,25 @@ def get_report_topic(code: str) -> tuple:
         r.encoding = "utf-8"
         data = json.loads(r.text.strip().lstrip("var yanbaolist=").rstrip(";"))
         for d in data["data"]:
-            topic.append({"declare_date": d[0], "code": d[1], "name": d[2],
+            topics.append({"declare_date": d[0], "code": d[1], "name": d[2],
                           "title": d[5], "analyst": d[6], "url": url_format.format(d[7]),
                           "cs_name": d[9], "source": "jrj", "type": "report"})
-            entity.append(Entity(d[15], "行业"))
+            nodes.append(Node(d[15], "行业", "jrj"))
             if isinstance(d[16], list):
                 for c, n in d[16]:
-                    entity.append(Entity(n, "概念"))
-                    relation.append(Relation(code, "属于", n))
-
+                    nodes.append(Node(n, "概念", "jrj"))
+                    links.append(Link(code, "属于", n, "jrj"))
     except Exception as e:
         logging.warning(e)
-
-    return list(set(entity)), list(set(relation)), topic
+    nodes = list(set(nodes))
+    links = list(set(links))
+    return nodes, links, topics
 
 
 def get_report_content(url: str) -> dict:
     r = requests.get(url)
     r.encoding = "gb2312"
-    ret = {}
+    ret = {"url": url}
     try:
         soup = BeautifulSoup(r.text, "html.parser")
         replayContent_div = soup.find("div", id="replayContent")
@@ -101,15 +111,16 @@ def get_report_content(url: str) -> dict:
             if div:
                 ret.setdefault("content", div[0].text.strip())
     except Exception as e:
-        logging.warning(e)
+        e.__traceback__
+        ret.setdefault("content", "--")
     return ret
 
 
 def get_product(code: str):
     url = "http://stock.jrj.com.cn/share,{},zyyw.shtml".format(code)
-    entity, relation = [], []
-    Entity = namedtuple("Entity", "name type")
-    Relation = namedtuple("Relation", "head head_type relation tail tail_type extend")
+    nodes, links = [], []
+    Node = namedtuple("Node", "name type source")
+    Link = namedtuple("Link", "head link tail extend source")
     r = requests.get(url)
     r.encoding = "gb2312"
     try:
@@ -129,21 +140,26 @@ def get_product(code: str):
                 td = tr_.find_all("td")
                 if len(td) == 7:
                     product_ = td[0].text
-                    extend_ = json.dumps({"percent": td[2].text, "rate": td[-1].text})
-                    entity.append(Entity(product_, "产品"))
-                    relation.append(Relation(code, "股票", "生产", product_, "产品", extend_))
+                    extend_ = json.dumps({"主营收入": td[1].text,
+                                          "收入比例": td[2].text,
+                                          "主营成本": td[3].text,
+                                          "成本比例": td[4].text,
+                                          "利润比例": td[5].text,
+                                          "毛利率": td[6].text})
+                    nodes.append(Node(product_, "产品", "jrj"))
+                    links.append(Link(code, "生产", product_, extend_, "jrj"))
     except Exception as e:
         logging.warning(e)
-    return entity, relation
+    return nodes, links
 
 
 def get_holder(code: str):
     url = "http://stock.jrj.com.cn/share,{},sdgd.shtml".format(code)
-    entity, relation = [], []
-    Entity = namedtuple("Entity", "name type")
-    Relation = namedtuple("Relation", "head head_type relation tail tail_type extend")
+    nodes, links = [], []
+    Node = namedtuple("Node", "name type source")
+    Link = namedtuple("Link", "head link tail extend source")
     r = requests.get(url)
-    r.encoding = "gb2312"
+    r.encoding = "gbk"
     try:
         soup = BeautifulSoup(r.text, "html.parser")
         table = soup.find_all("table")
@@ -155,15 +171,19 @@ def get_holder(code: str):
                     td = tr_.find_all("td")
                     if td and len(td) == 7:
                         company_ = td[1].text
-                        extend_ = json.dumps({"percent": td[3].text})
-                        entity.append(Entity(td[1].text, "公司/基金/个人"))
-                        relation.append(Relation(code, "股票", "股东", company_, "公司/基金/个人", extend_))
+                        extend_ = json.dumps({"持股数量": td[2].text,
+                                              "持股比例": td[3].text,
+                                              "变化": td[4].text,
+                                              "股份类型": td[5].text,
+                                              "股东性质": td[6].text})
+                        nodes.append(Node(td[1].text, __recognize_entity(td[1].text), "jrj"))
+                        links.append(Link(code, "股东", company_,  extend_, "jrj"))
             else:
                 continue
     except Exception as e:
         logging.warning(e)
-    return entity, relation
+    return nodes, links
 
 
 if __name__ == '__main__':
-    print(get_news_content("http://stock.jrj.com.cn/2018/04/25000024448872.shtml"))
+    print(get_holder("600597"))

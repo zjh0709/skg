@@ -55,14 +55,13 @@ def get_report_content(url: str) -> dict:
     return ret
 
 
-# return entity, relation
 def get_concept(code: str) -> list:
     url = "http://vip.stock.finance.sina.com.cn/corp/go.php/vCI_CorpOtherInfo/stockid/{}/menu_num/2.phtml".format(code)
-    entity, relation = [], []
-    Entity = namedtuple("Entity", "name type")
-    Relation = namedtuple("Relation", "head relation tail")
+    nodes, links = [], []
+    Node = namedtuple("Node", "name type source")
+    Link = namedtuple("Link", "head link tail source")
     r = requests.get(url)
-    r.encoding = "gb2312"
+    r.encoding = "gbk"
     try:
         soup = BeautifulSoup(r.text, "html.parser")
         tr = soup.find_all("tr")
@@ -70,43 +69,11 @@ def get_concept(code: str) -> list:
             td = tr_.find_all("td")
             if len(td) == 2 and "href" in td[1].prettify():
                 concept_ = td[0].text
-                entity.append(Entity(concept_, "概念"))
-                relation.append(Relation(code, "属于", concept_))
+                nodes.append(Node(concept_, "概念", "sina"))
+                links.append(Link(code, "属于", concept_, "sina"))
     except Exception as e:
         logging.warning(e)
-    return entity, relation
-
-
-def get_holder(code: str):
-    url = "http://vip.stock.finance.sina.com.cn/corp/go.php/vCI_StockHolder/stockid/{}/displaytype/30.phtml".format(
-        code)
-    entity, relation = [], []
-    Entity = namedtuple("Entity", "name type")
-    Relation = namedtuple("Relation", "head relation tail extend")
-    r = requests.get(url)
-    r.encoding = "gb2312"
-    try:
-        soup = BeautifulSoup(r.text, "html.parser")
-        tr = soup.find_all("tr")
-        start_flag = False
-        for tr_ in tr:
-            if "编号" not in tr_.text and start_flag is False:
-                continue
-            elif start_flag is False:
-                start_flag = True
-                continue
-            else:
-                td = tr_.find_all("td")
-                if len(td) == 5:
-                    company_ = td[1].text
-                    extend_ = json.dumps({"percent": td[3].text, "property": td[4].text})
-                    entity.append(Entity(company_, "公司/基金/个人"))
-                    relation.append(Relation(code, "股东", company_, extend_))
-                else:
-                    break
-    except Exception as e:
-        logging.warning(e)
-    return entity, relation
+    return nodes, links
 
 
 if __name__ == '__main__':

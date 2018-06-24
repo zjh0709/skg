@@ -1,9 +1,9 @@
 import logging
 
-MONGODB_HOST = "master"
+MONGODB_HOST = "192.168.1.18"
 MONGODB_PORT = 17585
 MONGODB_DB = "skg"
-ZK_HOST = "master:2181"
+ZK_HOST = "192.168.1.18:2181"
 ZK_ROOT = "/skg/"
 
 logging.basicConfig(level=logging.INFO,

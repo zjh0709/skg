@@ -1,14 +1,12 @@
 import tushare as ts
-import time
+import datetime
 from collections import namedtuple
-from concurrent.futures import ThreadPoolExecutor
 
 
-# return entity(dict), relation(tuple), basic(dict)
 def get_stock_basic() -> list:
-    entity, relation, basic = [], [], []
-    Entity = namedtuple("Entity", "name type")
-    Relation = namedtuple("Relation", "head relation tail")
+    nodes, links = [], []
+    Node = namedtuple("Node", "name type source")
+    Link = namedtuple("Link", "head link tail source")
     df = ts.get_stock_basics()
     df.reset_index(inplace=True)
     data = df.to_dict(orient="records")
@@ -16,29 +14,31 @@ def get_stock_basic() -> list:
     concept_mapper = ts.get_concept_classified().groupby(["code"])["c_name"].apply(lambda x: x.tolist()).to_dict()
     area_mapper = ts.get_area_classified().groupby(["code"])["area"].apply(lambda x: x.tolist()).to_dict()
     for d in data:
-        entity.append(Entity(d["name"], "公司名称"))
-        relation.append(Relation(d["code"], "等于", d["name"]))
+        nodes.append(Node(d["name"], "公司", "tu"))
+        links.append(Link(d["code"], "等于", d["name"], "tu"))
         for k in set(industry_mapper.get(d["code"], []) + [d["industry"]]):
-            entity.append(Entity(k, "行业"))
-            relation.append(Relation(d["code"], "属于", k))
+            nodes.append(Node(k, "行业", "tu"))
+            links.append(Link(d["code"], "属于", k, "tu"))
         for k in concept_mapper.get(d["code"], []):
-            entity.append(Entity(k, "概念"))
-            relation.append(Relation(d["code"], "属于", k))
+            nodes.append(Node(k, "概念", "tu"))
+            links.append(Link(d["code"], "属于", k, "tu"))
         for k in set(area_mapper.get(d["code"], []) + [d["area"]]):
-            entity.append(Entity(k, "区域"))
-            relation.append(Relation(d["code"], "属于", k))
+            nodes.append(Node(k, "区域", "tu"))
+            links.append(Link(d["code"], "属于", k, "tu"))
         del d["industry"], d["area"]
-    return list(set(entity)), relation, data
+    nodes = list(set(nodes))
+    return nodes, links, data
 
 
 def get_news_topic(num: int = 1000) -> list:
     df = ts.get_latest_news(top=num, show_content=False)
-    df['timestamp'] = int(time.time())
+    df["timestamp"] = datetime.datetime.now().strftime("%Y-%m-%d %X")
+    df["source"] = "tu"
     data = df.to_dict(orient="records")
     return data
 
 
-def get_news_content(url: str):
+def get_news_content(url: str) -> str:
     content = ts.latest_content(url)
     content = content if content is not None else "--"
     return content

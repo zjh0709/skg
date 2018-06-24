@@ -1,289 +1,176 @@
-from jiucai_knowledge_graph import MONGODB_HOST, MONGODB_PORT, MONGODB_DB, ZK_HOST, ZK_ROOT
-from jiucai_knowledge_graph.resource import tu, sina, jrj
-import pymongo
-from kazoo.client import KazooClient
-from kazoo.handlers.threading import KazooTimeoutError
+from jiucai_knowledge_graph import ZK_ROOT
+from jiucai_knowledge_graph.util.DataUtil import DataUtil
+from jiucai_knowledge_graph.util.ZkUtil import ZkUtil
+from jiucai_knowledge_graph.resource import tu, sina, jrj, hexun
 from concurrent.futures import ThreadPoolExecutor
-import logging
-from functools import partial
-import time
 
 
 class BasicJob(object):
-    def __init__(self, zk_node: str):
-        self.client = pymongo.MongoClient(host=MONGODB_HOST, port=MONGODB_PORT, connect=False)
-        self.db = self.client.get_database(MONGODB_DB)
-        self.zk_job_node = ZK_ROOT + "job"
-        self.zk_status_node = self.zk_job_node + "/" + zk_node + "/status"
-        self.zk_total_node = self.zk_job_node + "/" + zk_node + "/total"
-        self.zk_counter_node = self.zk_job_node + "/" + zk_node + "/counter"
-        self.zk = KazooClient(hosts=ZK_HOST)
-        self.zk_start()
-        self.counter = self.zk_get_counter()
+    def __init__(self, job_name: str):
+        self.data_util = DataUtil()
+        self.zk_util = ZkUtil()
+        self.zk_status_path = ZK_ROOT + "job/" + job_name + "/status"
+        self.zk_total_path = ZK_ROOT + "job/" + job_name + "/total"
+        self.zk_counter_path = ZK_ROOT + "job/" + job_name + "/counter"
         self.threading_num_low = 2
         self.threading_num_high = 6
-
-    def zk_start(self):
-        try:
-            self.zk.start()
-            if self.zk.exists(self.zk_status_node):
-                self.zk.stop()
-                exit("job is still running!")
-            else:
-                if not self.zk.exists(self.zk_job_node):
-                    self.zk.create(self.zk_job_node, b'job')
-                self.zk.create(path=self.zk_status_node,
-                               value=b"running",
-                               ephemeral=True,
-                               makepath=True)
-        except KazooTimeoutError as e:
-            self.zk = None
-            e.__traceback__
-
-    def zk_stop(self):
-        if self.zk is not None:
-            for node in [self.zk_status_node, self.zk_total_node, self.zk_counter_node]:
-                if self.zk.exists(node):
-                    self.zk.delete(node)
-            self.zk.stop()
-
-    def zk_get_counter(self):
-        counter = 0
-        if self.zk is not None:
-            if self.zk.exists(self.zk_counter_node):
-                self.zk.delete(self.zk_counter_node)
-            counter = self.zk.Counter(self.zk_counter_node)
+        if self.zk_util.exists(self.zk_status_path):
+            self.zk_util.stop()
+            exit("the last job is still running.")
         else:
-            pass
-        return counter
-
-    def zk_set_total(self, num: int):
-        if self.zk is not None:
-            if self.zk.exists(self.zk_total_node):
-                self.zk.delete(self.zk_total_node)
-            self.zk.create(path=self.zk_total_node,
-                           value=str(num).encode(),
-                           makepath=True)
-
-    def update(self, collection_name: str, spec: dict, document: dict, upsert=True):
-        document.setdefault("timestamp", int(time.time() * 1000))
-        self.db.get_collection(collection_name).update(spec, {"$set": document}, upsert)
-        logging.info(spec)
+            self.zk_util.create_ephemeral(self.zk_status_path, "running")
+        self.counter = self.zk_util.counter(self.zk_counter_path)
 
     def tushare_basic(self) -> None:
-        entity, relation, data = tu.get_stock_basic()
-        self.zk_set_total(len(entity)+len(relation)+len(data))
-        entity_update = partial(self.update, "entity")
+        nodes, links, data = tu.get_stock_basic()
+        self.zk_util.create(self.zk_total_path, len(nodes) + len(links) + len(data))
         with ThreadPoolExecutor(max_workers=self.threading_num_low) as executor:
-            executor.map(entity_update,
-                         map(lambda x: {"name": x.name}, entity),
-                         map(lambda x: {"name": x.name, "type": x.type}, entity))
-        self.counter += len(entity)
-        relation_update = partial(self.update, "relation")
+            executor.map(self.data_util.save_node, nodes)
+        self.counter += len(nodes)
         with ThreadPoolExecutor(max_workers=self.threading_num_low) as executor:
-            executor.map(relation_update,
-                         map(lambda x: {"head": x.head, "tail": x.tail}, relation),
-                         map(lambda x: {"head": x.head, "relation": x.relation, "tail": x.tail}, relation))
-        self.counter += len(relation)
-        basic_update = partial(self.update, "basic")
+            executor.map(self.data_util.save_link, links)
+        self.counter += len(links)
         with ThreadPoolExecutor(max_workers=self.threading_num_low) as executor:
-            executor.map(basic_update,
-                         map(lambda x: {"code": x["code"]}, data),
-                         data)
+            executor.map(self.data_util.save_info, data)
         self.counter += len(data)
-        self.zk_stop()
+        self.zk_util.stop()
 
     def sina_concept(self):
-        stock = self.db.get_collection("basic").find({}, {"_id": 0, "code": 1})
-        stock = list(stock)
-        self.zk_set_total(len(stock))
+        stocks = self.data_util.get_stocks()
+        self.zk_util.create(self.zk_total_path, len(stocks))
 
         def run_one(code: str):
-            entity, relation = sina.get_concept(code)
-            for x in entity:
-                self.update("entity",
-                            {"name": x.name},
-                            {"name": x.name, "type": x.type},
-                            upsert=True)
-            for x in relation:
-                self.update("relation",
-                            {"head": x.head, "tail": x.tail},
-                            {"head": x.head, "relation": x.relation, "tail": x.tail},
-                            upsert=True)
+            nodes, links = sina.get_concept(code)
+            for node in nodes:
+                self.data_util.save_node(node)
+            for link in links:
+                self.data_util.save_link(link)
             self.counter += 1
 
         with ThreadPoolExecutor(max_workers=self.threading_num_low) as executor:
-            executor.map(run_one,
-                         list(map(lambda x: x["code"], stock)))
-        self.zk_stop()
-
-    def sina_holder(self):
-        stock = self.db.get_collection("basic").find({}, {"_id": 0, "code": 1})
-        stock = list(stock)
-        self.zk_set_total(len(stock))
-
-        def run_one(code: str):
-            entity, relation = sina.get_holder(code)
-            for x in entity:
-                self.update("entity",
-                            {"name": x.name},
-                            {"name": x.name, "type": x.type},
-                            upsert=True)
-            for x in relation:
-                self.update("relation",
-                            {"head": x.head, "tail": x.tail},
-                            {"head": x.head, "relation": x.relation, "tail": x.tail, "extend": x.extend},
-                            upsert=True)
-            self.counter += 1
-
-        with ThreadPoolExecutor(max_workers=self.threading_num_low) as executor:
-            executor.map(run_one,
-                         list(map(lambda x: x["code"], stock)))
-        self.zk_stop()
+            executor.map(run_one, stocks)
+        self.zk_util.stop()
 
     def jrj_product(self):
-        stock = self.db.get_collection("basic").find({}, {"_id": 0, "code": 1})
-        stock = list(stock)
-        self.zk_set_total(len(stock))
+        stocks = self.data_util.get_stocks()
+        self.zk_util.create(self.zk_total_path, len(stocks))
 
         def run_one(code: str):
-            entity, relation = jrj.get_product(code)
-            for x in entity:
-                self.update("entity",
-                            {"name": x.name},
-                            {"name": x.name, "type": x.type},
-                            upsert=True)
-            for x in relation:
-                self.update("relation",
-                            {"head": x.head, "head_type": x.head_type, "tail": x.tail, "tail_type": x.tail_type},
-                            {"head": x.head, "head_type": x.head_type, "relation": x.relation,
-                             "tail": x.tail, "tail_type": x.tail_type, "extend": x.extend},
-                            upsert=True)
+            nodes, links = jrj.get_product(code)
+            for node in nodes:
+                self.data_util.save_node(node)
+            for link in links:
+                self.data_util.save_link(link)
             self.counter += 1
 
         with ThreadPoolExecutor(max_workers=self.threading_num_high) as executor:
-            executor.map(run_one,
-                         list(map(lambda x: x["code"], stock)))
-        self.zk_stop()
+            executor.map(run_one, stocks)
+        self.zk_util.stop()
 
     def jrj_holder(self):
-        stock = self.db.get_collection("basic").find({}, {"_id": 0, "code": 1})
-        stock = list(stock)
-        self.zk_set_total(len(stock))
+        stocks = self.data_util.get_stocks()
+        self.zk_util.create(self.zk_total_path, len(stocks))
 
         def run_one(code: str):
-            entity, relation = jrj.get_holder(code)
-            for x in entity:
-                self.update("entity",
-                            {"name": x.name},
-                            {"name": x.name, "type": x.type},
-                            upsert=True)
-            for x in relation:
-                self.update("relation",
-                            {"head": x.head, "head_type": x.head_type, "tail": x.tail, "tail_type": x.tail_type},
-                            {"head": x.head, "head_type": x.head_type, "relation": x.relation,
-                             "tail": x.tail, "tail_type": x.tail_type, "extend": x.extend},
-                            upsert=True)
+            nodes, links = jrj.get_holder(code)
+            for node in nodes:
+                self.data_util.save_node(node)
+            for link in links:
+                self.data_util.save_link(link)
             self.counter += 1
 
         with ThreadPoolExecutor(max_workers=self.threading_num_high) as executor:
-            executor.map(run_one,
-                         list(map(lambda x: x["code"], stock)))
-        self.zk_stop()
+            executor.map(run_one, stocks)
+        self.zk_util.stop()
 
     def jrj_report_topic(self):
-        stock = self.db.get_collection("basic").find({}, {"_id": 0, "code": 1})
-        stock = list(stock)
-        self.zk_set_total(len(stock))
+        stocks = self.data_util.get_stocks()
+        self.zk_util.create(self.zk_total_path, len(stocks))
 
         def run_one(code: str):
-            entity, relation, topic = jrj.get_report_topic(code)
-            for x in entity:
-                self.update("entity",
-                            {"name": x.name},
-                            {"name": x.name, "type": x.type},
-                            upsert=True)
-            for x in relation:
-                self.update("relation",
-                            {"head": x.head, "tail": x.tail},
-                            {"head": x.head, "relation": x.relation, "tail": x.tail},
-                            upsert=True)
-            for x in topic:
-                self.update("article",
-                            {"url": x["url"]},
-                            x,
-                            upsert=True)
+            nodes, links, articles = jrj.get_report_topic(code)
+            for node in nodes:
+                self.data_util.save_node(node)
+            for link in links:
+                self.data_util.save_link(link)
+            for article in articles:
+                self.data_util.save_article(article)
             self.counter += 1
 
         with ThreadPoolExecutor(max_workers=self.threading_num_high) as executor:
-            executor.map(run_one,
-                         list(map(lambda x: x["code"], stock)))
-        self.zk_stop()
+            executor.map(run_one, stocks)
+        self.zk_util.stop()
 
     def jrj_report_content(self, num: int):
-        url = self.db.get_collection("article").find({"source": "jrj", "type": "report", "content": {"$exists": False}},
-                                                     {"_id": 0, "url": 1}).limit(num)
-        url = list(url)
-        self.zk_set_total(len(url))
+        articles = self.data_util.get_articles(where={"source": "jrj", "type": "report", "content": {"$exists": False}},
+                                               filed={"_id": 0, "url": 1},
+                                               limit=num)
+        self.zk_util.create(self.zk_total_path, len(articles))
 
-        def run_one(url_: str):
-            data = jrj.get_report_content(url_)
-            self.update("article",
-                        {"url": url_},
-                        data,
-                        upsert=False)
+        def run_one(article: dict):
+            content = jrj.get_report_content(article["url"])
+            self.data_util.save_article(content)
             self.counter += 1
 
         with ThreadPoolExecutor(max_workers=self.threading_num_high) as executor:
-            executor.map(run_one,
-                         list(map(lambda x: x["url"], url)))
-        self.zk_stop()
+            executor.map(run_one, articles)
+        self.zk_util.stop()
 
     def jrj_news_topic(self, recover=False):
-        stock = self.db.get_collection("basic").find({}, {"_id": 0, "code": 1})
-        stock = list(stock)
-        self.zk_set_total(len(stock))
+        stocks = self.data_util.get_stocks()
+        self.zk_util.create(self.zk_total_path, len(stocks))
 
         def run_one(code: str):
-            links, max_page = jrj.get_news_topic(code, 1)
-            for x in links:
-                self.update("article",
-                            {"url": x["url"]},
-                            x,
-                            upsert=True)
+            articles, max_page = jrj.get_news_topic(code, 1)
+            for article in articles:
+                self.data_util.save_article(article)
             if recover is True and max_page > 1:
                 for i in range(2, max_page + 1):
-                    links, _ = jrj.get_news_topic(code, 1)
-                    for x in links:
-                        self.update("article",
-                                    {"url": x["url"]},
-                                    x,
-                                    upsert=True)
+                    articles, _ = jrj.get_news_topic(code, i)
+                    for article in articles:
+                        self.data_util.save_article(article)
             self.counter += 1
 
         with ThreadPoolExecutor(max_workers=self.threading_num_high) as executor:
-            executor.map(run_one,
-                         list(map(lambda x: x["code"], stock)))
-        self.zk_stop()
+            executor.map(run_one, stocks)
+        self.zk_util.stop()
 
     def jrj_news_content(self, num: int):
-        url = self.db.get_collection("article").find({"source": "jrj", "type": "news", "content": {"$exists": False}},
-                                                     {"_id": 0, "url": 1}).limit(num)
-        url = list(url)
-        self.zk_set_total(len(url))
+        articles = self.data_util.get_articles(where={"source": "jrj", "type": "news", "content": {"$exists": False}},
+                                               filed={"_id": 0, "url": 1},
+                                               limit=num)
+        self.zk_util.create(self.zk_total_path, len(articles))
 
-        def run_one(url_: str):
-            data = jrj.get_news_content(url_)
-            self.update("article",
-                        {"url": url_},
-                        data,
-                        upsert=False)
+        def run_one(article: dict):
+            content = jrj.get_news_content(article["url"])
+            self.data_util.save_article(content)
             self.counter += 1
 
         with ThreadPoolExecutor(max_workers=self.threading_num_high) as executor:
-            executor.map(run_one,
-                         list(map(lambda x: x["url"], url)))
-        self.zk_stop()
+            executor.map(run_one, articles)
+        self.zk_util.stop()
+
+    def hexun_chain(self):
+        nodes, links, data = hexun.get_chain_topic()
+        self.zk_util.create(self.zk_total_path, 2+len(data))
+        for node in nodes:
+            self.data_util.save_node(node)
+        self.counter += 1
+        for link in links:
+            self.data_util.save_link(link)
+        self.counter += 1
+
+        def run_one(d: dict):
+            nodes_, links_ = hexun.get_chain_content(d)
+            for node_ in nodes_:
+                self.data_util.save_node(node_)
+            for link_ in links_:
+                self.data_util.save_link(link_)
+            self.counter += 1
+
+        with ThreadPoolExecutor(max_workers=self.threading_num_high) as executor:
+            executor.map(run_one, data)
+        self.zk_util.stop()
 
     @staticmethod
     def run_tushare_basic():
@@ -330,6 +217,11 @@ class BasicJob(object):
         kg = BasicJob("jrj_news_content")
         kg.jrj_news_content(num)
 
+    @staticmethod
+    def run_hexun_chain():
+        kg = BasicJob("hexun_chain")
+        kg.hexun_chain()
+
 
 if __name__ == '__main__':
-    BasicJob.run_jrj_product()
+    BasicJob.run_hexun_chain()

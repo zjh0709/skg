@@ -19,7 +19,7 @@ if __name__ == '__main__':
         with DaemonContext():
             JobWatcher.start()
             while True:
-                time.sleep(1)
+                time.sleep(100)
     elif args.name == "watcher" and args.action == "stop":
         logging.info("{} {}".format(args.name, args.action))
         JobWatcher.stop()
