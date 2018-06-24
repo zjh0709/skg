@@ -12,6 +12,10 @@ class ZkUtil(object):
         except KazooTimeoutError as e:
             e.__traceback__
 
+    @property
+    def client(self):
+        return self.zk
+
     def exists(self, path: str):
         if self.zk.client_state == KeeperState.CONNECTED:
             return self.zk.exists(path)
@@ -54,7 +58,4 @@ class ZkUtil(object):
             self.zk.close()
         except Exception as e:
             e.__traceback__
-
-    def client(self):
-        return self.zk
 
