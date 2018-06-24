@@ -20,6 +20,7 @@ class BasicJob(object):
         if self.zk_util.exists(self.zk_status_path):
             self.zk_util.stop()
             logging.info("the last job is still running.")
+            logging.info("will kill this application, pid {}".format(os.getpid()))
             os.kill(os.getpid(), signal.SIGKILL)
             exit("the last job is still running.")
         else:
