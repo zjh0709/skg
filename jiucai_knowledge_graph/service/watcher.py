@@ -15,11 +15,6 @@ class JobWatcher(object):
         self.zk_start_path = ZK_ROOT + "start"
         self.zk_stop_path = ZK_ROOT + "stop"
         self.zk_pid_path = ZK_ROOT + "pid"
-        if self.zk_util.exists(self.zk_service_path):
-            self.zk_util.stop()
-            exit("service is still running")
-        else:
-            self.zk_util.create_ephemeral(self.zk_service_path, os.getpid())
 
     def runner(self, job: str):
         if job == "tushare_basic":
@@ -40,6 +35,12 @@ class JobWatcher(object):
             pass
 
     def run_start(self):
+        if self.zk_util.exists(self.zk_service_path):
+            self.zk_util.stop()
+            exit("service is still running")
+        else:
+            self.zk_util.create_ephemeral(self.zk_service_path, os.getpid())
+
         @self.zk_util.child_watch(self.zk_start_path)
         def start_watch(children):
             for job in children:
