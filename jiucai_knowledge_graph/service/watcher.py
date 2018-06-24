@@ -41,7 +41,7 @@ class JobWatcher(object):
         else:
             self.zk_util.create_ephemeral(self.zk_service_path, os.getpid())
 
-        @self.zk_util.child_watch(self.zk_start_path)
+        @self.zk_util.client.ChildrenWatch(self.zk_start_path)
         def start_watch(children):
             for job in children:
                 logging.info("start {}".format(job))
@@ -54,7 +54,7 @@ class JobWatcher(object):
                 else:
                     self.zk_util.create_ephemeral(self.zk_pid_path + "/" + job, pid)
 
-        @self.zk_util.child_watch(self.zk_stop_path)
+        @self.zk_util.client.ChildrenWatch(self.zk_stop_path)
         def stop_watch(children):
             for job in children:
                 logging.info("stop {}".format(job))

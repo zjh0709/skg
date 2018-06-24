@@ -55,5 +55,6 @@ class ZkUtil(object):
         except Exception as e:
             e.__traceback__
 
-    def child_watch(self, path: str):
-        return self.zk.ChildrenWatch(path)
+    def client(self):
+        return self.zk
+
