@@ -2,19 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="dca6479a-293b-40b9-9f5e-aed0ceb67464" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/jiucai_knowledge_graph/resource/hexun.py" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/jiucai_knowledge_graph/util/DataUtil.py" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/jiucai_knowledge_graph/util/ZkUtil.py" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/jiucai_knowledge_graph/util/__init__.py" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/jiucai_knowledge_graph/__init__.py" afterPath="$PROJECT_DIR$/jiucai_knowledge_graph/__init__.py" />
-      <change beforePath="$PROJECT_DIR$/jiucai_knowledge_graph/job/basic.py" afterPath="$PROJECT_DIR$/jiucai_knowledge_graph/job/basic.py" />
-      <change beforePath="$PROJECT_DIR$/jiucai_knowledge_graph/resource/jrj.py" afterPath="$PROJECT_DIR$/jiucai_knowledge_graph/resource/jrj.py" />
-      <change beforePath="$PROJECT_DIR$/jiucai_knowledge_graph/resource/sina.py" afterPath="$PROJECT_DIR$/jiucai_knowledge_graph/resource/sina.py" />
-      <change beforePath="$PROJECT_DIR$/jiucai_knowledge_graph/resource/tu.py" afterPath="$PROJECT_DIR$/jiucai_knowledge_graph/resource/tu.py" />
       <change beforePath="$PROJECT_DIR$/jiucai_knowledge_graph/service/watcher.py" afterPath="$PROJECT_DIR$/jiucai_knowledge_graph/service/watcher.py" />
-      <change beforePath="$PROJECT_DIR$/service.py" afterPath="$PROJECT_DIR$/service.py" />
-      <change beforePath="$PROJECT_DIR$/test.py" afterPath="$PROJECT_DIR$/test.py" />
+      <change beforePath="$PROJECT_DIR$/jiucai_knowledge_graph/util/ZkUtil.py" afterPath="$PROJECT_DIR$/jiucai_knowledge_graph/util/ZkUtil.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -35,11 +25,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="service.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="service.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/service.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="363">
-              <caret line="25" column="0" lean-forward="true" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
+            <state relative-caret-position="392">
+              <caret line="17" column="60" lean-forward="true" selection-start-line="17" selection-start-column="60" selection-end-line="17" selection-end-column="60" />
               <folding>
                 <element signature="e#0#61#0" expanded="true" />
               </folding>
@@ -71,11 +61,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ZkUtil.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="ZkUtil.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/jiucai_knowledge_graph/util/ZkUtil.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="319">
-              <caret line="24" column="23" lean-forward="false" selection-start-line="24" selection-start-column="23" selection-end-line="24" selection-end-column="23" />
+            <state relative-caret-position="324">
+              <caret line="36" column="30" lean-forward="false" selection-start-line="36" selection-start-column="30" selection-end-line="36" selection-end-column="30" />
               <folding>
                 <element signature="e#0#42#0" expanded="true" />
               </folding>
@@ -86,10 +76,10 @@
       <file leaf-file-name="watcher.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/jiucai_knowledge_graph/service/watcher.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="363">
-              <caret line="67" column="0" lean-forward="true" selection-start-line="67" selection-start-column="0" selection-end-line="67" selection-end-column="0" />
+            <state relative-caret-position="653">
+              <caret line="64" column="35" lean-forward="true" selection-start-line="64" selection-start-column="35" selection-end-line="64" selection-end-column="35" />
               <folding>
-                <element signature="e#0#51#0" expanded="true" />
+                <element signature="e#0#42#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -100,6 +90,16 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="0">
               <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="main.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/main.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="841">
+              <caret line="32" column="36" lean-forward="false" selection-start-line="32" selection-start-column="36" selection-end-line="32" selection-end-column="36" />
               <folding />
             </state>
           </provider>
@@ -145,7 +145,6 @@
         <option value="$PROJECT_DIR$/kg_service/__init__.py" />
         <option value="$PROJECT_DIR$/kg_service/Watcher.py" />
         <option value="$PROJECT_DIR$/jiucai_knowledge_graph/service/__init__.py" />
-        <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/jiucai_knowledge_graph/resource/__init__.py" />
         <option value="$PROJECT_DIR$/jiucai_knowledge_graph/resource/sina.py" />
         <option value="$PROJECT_DIR$/jiucai_knowledge_graph/resource/hexun.py" />
@@ -158,9 +157,10 @@
         <option value="$PROJECT_DIR$/jiucai_knowledge_graph/util/DataUtil.py" />
         <option value="$PROJECT_DIR$/jiucai_knowledge_graph/resource/jrj.py" />
         <option value="$PROJECT_DIR$/jiucai_knowledge_graph/job/basic.py" />
-        <option value="$PROJECT_DIR$/jiucai_knowledge_graph/util/ZkUtil.py" />
-        <option value="$PROJECT_DIR$/jiucai_knowledge_graph/service/watcher.py" />
         <option value="$PROJECT_DIR$/service.py" />
+        <option value="$PROJECT_DIR$/main.py" />
+        <option value="$PROJECT_DIR$/jiucai_knowledge_graph/service/watcher.py" />
+        <option value="$PROJECT_DIR$/jiucai_knowledge_graph/util/ZkUtil.py" />
       </list>
     </option>
   </component>
@@ -274,7 +274,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.basic">
+  <component name="RunManager" selected="Python.watcher">
     <configuration name="basic" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -306,24 +306,6 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="skg" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/jiucai_knowledge_graph/resource/hexun.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-    </configuration>
-    <configuration name="jrj" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/jiucai_knowledge_graph/resource" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="skg" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/jiucai_knowledge_graph/resource/jrj.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -365,20 +347,38 @@
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
     </configuration>
+    <configuration name="watcher" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/jiucai_knowledge_graph/service" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="skg" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/jiucai_knowledge_graph/service/watcher.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+    </configuration>
     <list size="5">
       <item index="0" class="java.lang.String" itemvalue="Python.basic" />
       <item index="1" class="java.lang.String" itemvalue="Python.hexun" />
-      <item index="2" class="java.lang.String" itemvalue="Python.jrj" />
-      <item index="3" class="java.lang.String" itemvalue="Python.sina" />
-      <item index="4" class="java.lang.String" itemvalue="Python.test" />
+      <item index="2" class="java.lang.String" itemvalue="Python.sina" />
+      <item index="3" class="java.lang.String" itemvalue="Python.test" />
+      <item index="4" class="java.lang.String" itemvalue="Python.watcher" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.basic" />
-        <item index="1" class="java.lang.String" itemvalue="Python.test" />
-        <item index="2" class="java.lang.String" itemvalue="Python.hexun" />
-        <item index="3" class="java.lang.String" itemvalue="Python.sina" />
-        <item index="4" class="java.lang.String" itemvalue="Python.jrj" />
+        <item index="0" class="java.lang.String" itemvalue="Python.watcher" />
+        <item index="1" class="java.lang.String" itemvalue="Python.basic" />
+        <item index="2" class="java.lang.String" itemvalue="Python.test" />
+        <item index="3" class="java.lang.String" itemvalue="Python.hexun" />
+        <item index="4" class="java.lang.String" itemvalue="Python.sina" />
       </list>
     </recent_temporary>
   </component>
@@ -395,20 +395,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1528875456498</updated>
-    </task>
-    <task id="LOCAL-00011" summary="zookeeper">
-      <created>1529083792474</created>
-      <option name="number" value="00011" />
-      <option name="presentableId" value="LOCAL-00011" />
-      <option name="project" value="LOCAL" />
-      <updated>1529083792474</updated>
-    </task>
-    <task id="LOCAL-00012" summary="zookeeper">
-      <created>1529084054952</created>
-      <option name="number" value="00012" />
-      <option name="presentableId" value="LOCAL-00012" />
-      <option name="project" value="LOCAL" />
-      <updated>1529084054952</updated>
     </task>
     <task id="LOCAL-00013" summary="zookeeper">
       <created>1529084687975</created>
@@ -739,7 +725,21 @@
       <option name="project" value="LOCAL" />
       <updated>1529574460314</updated>
     </task>
-    <option name="localTasksCounter" value="60" />
+    <task id="LOCAL-00060" summary="fix">
+      <created>1529818760606</created>
+      <option name="number" value="00060" />
+      <option name="presentableId" value="LOCAL-00060" />
+      <option name="project" value="LOCAL" />
+      <updated>1529818760608</updated>
+    </task>
+    <task id="LOCAL-00061" summary="fix">
+      <created>1529818811263</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1529818811266</updated>
+    </task>
+    <option name="localTasksCounter" value="62" />
     <servers />
   </component>
   <component name="TodoView">
@@ -899,16 +899,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="551">
-          <caret line="22" column="28" lean-forward="false" selection-start-line="22" selection-start-column="28" selection-end-line="22" selection-end-column="28" />
-          <folding>
-            <element signature="e#0#15#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/bs4/element.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-246">
@@ -1065,32 +1055,40 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/jiucai_knowledge_graph/util/ZkUtil.py">
+    <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="319">
-          <caret line="24" column="23" lean-forward="false" selection-start-line="24" selection-start-column="23" selection-end-line="24" selection-end-column="23" />
+        <state relative-caret-position="841">
+          <caret line="32" column="36" lean-forward="false" selection-start-line="32" selection-start-column="36" selection-end-line="32" selection-end-column="36" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/service.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="392">
+          <caret line="17" column="60" lean-forward="true" selection-start-line="17" selection-start-column="60" selection-end-line="17" selection-end-column="60" />
           <folding>
-            <element signature="e#0#42#0" expanded="true" />
+            <element signature="e#0#61#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/jiucai_knowledge_graph/service/watcher.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="363">
-          <caret line="67" column="0" lean-forward="true" selection-start-line="67" selection-start-column="0" selection-end-line="67" selection-end-column="0" />
+        <state relative-caret-position="653">
+          <caret line="64" column="35" lean-forward="true" selection-start-line="64" selection-start-column="35" selection-end-line="64" selection-end-column="35" />
           <folding>
-            <element signature="e#0#51#0" expanded="true" />
+            <element signature="e#0#42#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/service.py">
+    <entry file="file://$PROJECT_DIR$/jiucai_knowledge_graph/util/ZkUtil.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="363">
-          <caret line="25" column="0" lean-forward="true" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
+        <state relative-caret-position="324">
+          <caret line="36" column="30" lean-forward="false" selection-start-line="36" selection-start-column="30" selection-end-line="36" selection-end-column="30" />
           <folding>
-            <element signature="e#0#61#0" expanded="true" />
+            <element signature="e#0#42#0" expanded="true" />
           </folding>
         </state>
       </provider>

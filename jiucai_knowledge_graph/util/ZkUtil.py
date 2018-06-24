@@ -32,7 +32,9 @@ class ZkUtil(object):
                 self.zk.delete(path, recursive=True)
             self.zk.create(path=path, value=value.encode(), makepath=True)
 
-    def create_ephemeral(self, path: str, value: str):
+    def create_ephemeral(self, path: str, value):
+        if isinstance(value, int):
+            value = str(value)
         if self.zk.client_state == KeeperState.CONNECTED:
             self.zk.create(path=path, value=value.encode(), ephemeral=True, makepath=True)
 

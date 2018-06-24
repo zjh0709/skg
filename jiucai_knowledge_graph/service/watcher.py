@@ -1,7 +1,5 @@
-from jiucai_knowledge_graph import ZK_ROOT, ZK_HOST
+from jiucai_knowledge_graph import ZK_ROOT
 from jiucai_knowledge_graph.job.basic import BasicJob
-from kazoo.client import KazooClient
-from kazoo.handlers.threading import KazooTimeoutError
 from kazoo.exceptions import NoNodeError
 import logging
 import os
@@ -82,3 +80,7 @@ class JobWatcher(object):
     def stop():
         job_watcher = JobWatcher()
         job_watcher.run_stop()
+
+
+if __name__ == '__main__':
+    JobWatcher.start()
