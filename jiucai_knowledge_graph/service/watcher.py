@@ -48,8 +48,7 @@ class JobWatcher(object):
                 self.zk_util.delete(self.zk_start_path + "/" + job)
                 pid = os.fork()
                 if pid == 0:
-                    # self.runner(job)
-                    print(job)
+                    self.runner(job)
                     exit(0)
                 else:
                     self.zk_util.create_ephemeral(self.zk_pid_path + "/" + job, pid)
