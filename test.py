@@ -1,6 +1,4 @@
-from jiucai_knowledge_graph.job.basic import BasicJob
-
+from jiucai_knowledge_graph.service.watcher import JobWatcher
 
 if __name__ == '__main__':
-    BasicJob.run_jrj_product()
-
+    JobWatcher.start()
