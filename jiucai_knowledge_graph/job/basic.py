@@ -22,7 +22,6 @@ class BasicJob(object):
             logging.info("the last job is still running.")
             logging.info("will kill this application, pid {}".format(os.getpid()))
             os.kill(os.getpid(), signal.SIGKILL)
-            exit("the last job is still running.")
         else:
             self.zk_util.create_ephemeral(self.zk_status_path, "running")
         self.counter = self.zk_util.counter(self.zk_counter_path)
@@ -39,6 +38,29 @@ class BasicJob(object):
         with ThreadPoolExecutor(max_workers=self.threading_num_low) as executor:
             executor.map(self.data_util.save_info, data)
         self.counter += len(data)
+        self.zk_util.stop()
+
+    def tushare_news_topic(self, num: int):
+        articles = tu.get_news_topic(num)
+        self.zk_util.create(self.zk_total_path, num)
+        with ThreadPoolExecutor(max_workers=self.threading_num_low) as executor:
+            executor.map(self.data_util.save_article, articles)
+        self.counter += num
+        self.zk_util.stop()
+
+    def tushare_news_content(self, num: int):
+        articles = self.data_util.get_articles(where={"source": "tu", "type": "news", "content": {"$exists": False}},
+                                               filed={"_id": 0, "url": 1},
+                                               limit=num)
+        self.zk_util.create(self.zk_total_path, len(articles))
+
+        def run_one(article: dict):
+            content = tu.get_news_content(article["url"])
+            self.data_util.save_article(content)
+            self.counter += 1
+
+        with ThreadPoolExecutor(max_workers=self.threading_num_high) as executor:
+            executor.map(run_one, articles)
         self.zk_util.stop()
 
     def sina_concept(self):
@@ -184,6 +206,16 @@ class BasicJob(object):
         kg.tushare_basic()
 
     @staticmethod
+    def run_tushare_news_topic(num: int):
+        kg = BasicJob("tushare_news_topic")
+        kg.tushare_news_topic(num)
+
+    @staticmethod
+    def run_tushare_news_content(num: int):
+        kg = BasicJob("tushare_news_content")
+        kg.tushare_news_content(num)
+
+    @staticmethod
     def run_sina_concept():
         kg = BasicJob("sina_concept")
         kg.sina_concept()
@@ -230,4 +262,4 @@ class BasicJob(object):
 
 
 if __name__ == '__main__':
-    BasicJob.run_hexun_chain()
+    BasicJob.run_tushare_news_content(30)

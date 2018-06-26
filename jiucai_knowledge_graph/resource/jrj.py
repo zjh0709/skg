@@ -52,7 +52,7 @@ def get_news_topic(code: str, page: int = 1) -> tuple:
 def get_news_content(url: str) -> dict:
     r = requests.get(url)
     r.encoding = "gbk"
-    ret = {"url": url}
+    data = {"url": url}
     try:
         soup = BeautifulSoup(r.text, "html.parser")
         content_div = soup.find("div", class_="texttit_m1")
@@ -61,11 +61,11 @@ def get_news_content(url: str) -> dict:
             if "class" not in d.attrs:
                 content += d.text.strip()
         if content != "":
-            ret.setdefault("content", content)
+            data.setdefault("content", content)
     except Exception as e:
         e.__traceback__
-        ret.setdefault("content", "--")
-    return ret
+        data.setdefault("content", "--")
+    return data
 
 
 def get_report_topic(code: str) -> tuple:

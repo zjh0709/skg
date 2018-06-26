@@ -32,16 +32,18 @@ def get_stock_basic() -> list:
 
 def get_news_topic(num: int = 1000) -> list:
     df = ts.get_latest_news(top=num, show_content=False)
-    df["timestamp"] = datetime.datetime.now().strftime("%Y-%m-%d %X")
+    df["type"] = "news"
     df["source"] = "tu"
     data = df.to_dict(orient="records")
     return data
 
 
-def get_news_content(url: str) -> str:
+def get_news_content(url: str) -> dict:
+    data = {"url": url}
     content = ts.latest_content(url)
     content = content if content is not None else "--"
-    return content
+    data.setdefault("content", content)
+    return data
 
 
 if __name__ == '__main__':

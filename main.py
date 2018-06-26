@@ -21,6 +21,8 @@ if __name__ == "__main__":
         BasicJob.run_jrj_holder()
     elif args.action == "product" and args.source == "jrj":
         BasicJob.run_jrj_product()
+    elif args.action == "chain" and args.source == "hexun":
+        BasicJob.run_hexun_chain()
     elif args.action == "report_topic" and args.source == "jrj":
         BasicJob.run_jrj_report_topic()
     elif args.action == "report_content" and args.source == "jrj":
@@ -29,5 +31,11 @@ if __name__ == "__main__":
         BasicJob.run_jrj_news_topic(args.num is not None)
     elif args.action == "news_content" and args.source == "jrj":
         BasicJob.run_jrj_news_content(int(args.num) if args.num is not None else 20)
+    elif args.action == "news_topic" and args.source == "tushare":
+        # noinspection PyCallByClass
+        BasicJob.tushare_news_topic(int(args.num) if args.num is not None else 1000)
+    elif args.action == "news_content" and args.source == "tushare":
+        # noinspection PyCallByClass
+        BasicJob.tushare_news_content(int(args.num) if args.num is not None else 2000)
 
     logging.info("mission complete.")
