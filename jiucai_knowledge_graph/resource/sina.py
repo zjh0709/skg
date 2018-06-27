@@ -3,14 +3,16 @@ from bs4 import BeautifulSoup
 import re
 import logging
 from collections import namedtuple
-import json
 
 
 def get_report_topic(code: str, page: int = 1) -> tuple:
     topic_url = "http://vip.stock.finance.sina.com.cn/q/go.php/vReport_List/kind/search/index.phtml?symbol={" \
                 "}&t1=all&p={}".format(code, page)
     url_expr = re.compile("vip.stock.finance.sina.com.cn/q/go.php/vReport_Show/kind/search/rptid")
-    r = requests.get(topic_url)
+    headers = {
+        "User-Agent": "Mozilla/4.0 (compatible; MSIE7.0; WindowsNT5.1; Maxthon2.0)"
+    }
+    r = requests.get(topic_url, headers=headers)
     r.encoding = "gb2312"
     soup = BeautifulSoup(r.text, "html.parser")
     links_div = soup.find_all("a", href=url_expr)
@@ -33,7 +35,10 @@ def get_report_topic(code: str, page: int = 1) -> tuple:
 
 
 def get_report_content(url: str) -> dict:
-    r = requests.get(url)
+    headers = {
+        "User-Agent": "Mozilla/4.0 (compatible; MSIE7.0; WindowsNT5.1; Maxthon2.0)"
+    }
+    r = requests.get(url, headers=headers)
     r.encoding = "gb2312"
     ret = {}
     try:
@@ -60,7 +65,10 @@ def get_concept(code: str) -> list:
     nodes, links = [], []
     Node = namedtuple("Node", "name type source")
     Link = namedtuple("Link", "head link tail source")
-    r = requests.get(url)
+    headers = {
+        "User-Agent": "Mozilla/4.0 (compatible; MSIE7.0; WindowsNT5.1; Maxthon2.0)"
+    }
+    r = requests.get(url, headers=headers)
     r.encoding = "gbk"
     try:
         soup = BeautifulSoup(r.text, "html.parser")

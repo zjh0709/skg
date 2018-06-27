@@ -40,18 +40,28 @@ class BasicJob(object):
         self.counter += len(data)
         self.zk_util.stop()
 
-    def tushare_news_topic(self):
-        num = 5000
+    def tushare_news_topic(self, num: int):
         articles = tu.get_news_topic(num)
-        self.zk_util.create(self.zk_total_path, num)
-        with ThreadPoolExecutor(max_workers=self.threading_num_low) as executor:
-            executor.map(self.data_util.save_article, articles)
-        self.counter += num
+
+        if not articles:
+            logging.warning("data is None.")
+            self.zk_util.stop()
+            return None
+        self.zk_util.create(self.zk_total_path, len(articles))
+
+        def run_one(article: dict):
+            content = tu.get_news_content(article["url"])
+            self.data_util.save_article(content)
+            self.counter += 1
+
+        with ThreadPoolExecutor(max_workers=self.threading_num_high) as executor:
+            executor.map(run_one, articles)
         self.zk_util.stop()
 
-    def tushare_news_content(self):
+    def tushare_news_content(self, num: int):
         articles = self.data_util.get_articles(where={"source": "tu", "type": "news", "content": {"$exists": False}},
-                                               filed={"_id": 0, "url": 1})
+                                               filed={"_id": 0, "url": 1},
+                                               limit=num)
         self.zk_util.create(self.zk_total_path, len(articles))
 
         def run_one(article: dict):
@@ -129,9 +139,10 @@ class BasicJob(object):
             executor.map(run_one, stocks)
         self.zk_util.stop()
 
-    def jrj_report_content(self):
+    def jrj_report_content(self, num: int):
         articles = self.data_util.get_articles(where={"source": "jrj", "type": "report", "content": {"$exists": False}},
-                                               filed={"_id": 0, "url": 1})
+                                               filed={"_id": 0, "url": 1},
+                                               limit=num)
         self.zk_util.create(self.zk_total_path, len(articles))
 
         def run_one(article: dict):
@@ -162,9 +173,10 @@ class BasicJob(object):
             executor.map(run_one, stocks)
         self.zk_util.stop()
 
-    def jrj_news_content(self):
+    def jrj_news_content(self, num: int):
         articles = self.data_util.get_articles(where={"source": "jrj", "type": "news", "content": {"$exists": False}},
-                                               filed={"_id": 0, "url": 1})
+                                               filed={"_id": 0, "url": 1},
+                                               limit=num)
         self.zk_util.create(self.zk_total_path, len(articles))
 
         def run_one(article: dict):
@@ -199,60 +211,9 @@ class BasicJob(object):
         self.zk_util.stop()
 
     @staticmethod
-    def run_tushare_basic():
-        kg = BasicJob("tushare_basic")
-        kg.tushare_basic()
-
-    @staticmethod
-    def run_tushare_news_topic():
-        kg = BasicJob("tushare_news_topic")
-        kg.tushare_news_topic()
-
-    @staticmethod
-    def run_tushare_news_content():
-        kg = BasicJob("tushare_news_content")
-        kg.tushare_news_content()
-
-    @staticmethod
-    def run_sina_concept():
-        kg = BasicJob("sina_concept")
-        kg.sina_concept()
-
-    @staticmethod
-    def run_jrj_product():
-        kg = BasicJob("jrj_product")
-        kg.jrj_product()
-
-    @staticmethod
-    def run_jrj_holder():
-        kg = BasicJob("jrj_holder")
-        kg.jrj_holder()
-
-    @staticmethod
-    def run_jrj_report_topic():
-        kg = BasicJob("jrj_report_topic")
-        kg.jrj_report_topic()
-
-    @staticmethod
-    def run_jrj_report_content():
-        kg = BasicJob("jrj_report_content")
-        kg.jrj_report_content()
-
-    @staticmethod
-    def run_jrj_news_topic(recover=False):
-        kg = BasicJob("jrj_news_topic")
-        kg.jrj_news_topic(recover)
-
-    @staticmethod
-    def run_jrj_news_content():
-        kg = BasicJob("jrj_news_content")
-        kg.jrj_news_content()
-
-    @staticmethod
-    def run_hexun_chain():
-        kg = BasicJob("hexun_chain")
-        kg.hexun_chain()
+    def run(job_name, **kwargs):
+        getattr(BasicJob(job_name), job_name)(**kwargs)
 
 
 if __name__ == '__main__':
-    BasicJob.run_tushare_news_content(30)
+    BasicJob.run("tushare_news_topic", num=10)

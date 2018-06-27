@@ -1,39 +1,43 @@
-import argparse
+from argparse import ArgumentParser
 import datetime
 import logging
+import sys
 from jiucai_knowledge_graph.job.basic import BasicJob
 
 
 if __name__ == "__main__":
     today = datetime.datetime.now().strftime("%Y-%m-%d")
-    ap = argparse.ArgumentParser()
-    ap.add_argument("-a", "--action", help="", required=True)
-    ap.add_argument("-s", "--source", help="report", required=False)
-    ap.add_argument("-d", "--date", help=today, required=False, default=today)
-    ap.add_argument("-n", "--num", help="", required=False)
-    args = ap.parse_args()
+    parser = ArgumentParser(usage="%s main.py" % sys.executable,
+                            description="run main.",
+                            epilog="action source num date")
+    parser.add_argument("--action", dest="action", help="job")
+    parser.add_argument("--source", dest="source", help="from")
+    parser.add_argument("--num", dest="num", type=int, help="number")
+    parser.add_argument("--date", dest="date", help="date", default=today)
+    args = parser.parse_args()
+
     logging.info("mission start.")
     if args.action == "basic" and args.source == "tushare":
-        BasicJob.run_tushare_basic()
+        BasicJob.run("tushare_basic")
     elif args.action == "concept" and args.source == "sina":
-        BasicJob.run_sina_concept()
+        BasicJob.run("sina_concept")
     elif args.action == "holder" and args.source == "jrj":
-        BasicJob.run_jrj_holder()
+        BasicJob.run("jrj_holder")
     elif args.action == "product" and args.source == "jrj":
-        BasicJob.run_jrj_product()
+        BasicJob.run("jrj_product")
     elif args.action == "chain" and args.source == "hexun":
-        BasicJob.run_hexun_chain()
+        BasicJob.run("hexun_chain")
     elif args.action == "report_topic" and args.source == "jrj":
-        BasicJob.run_jrj_report_topic()
+        BasicJob.run("jrj_report_topic")
     elif args.action == "report_content" and args.source == "jrj":
-        BasicJob.run_jrj_report_content()
+        BasicJob.run("jrj_report_content", num=100 if args.num is None else args.num)
     elif args.action == "news_topic" and args.source == "jrj":
-        BasicJob.run_jrj_news_topic()
+        BasicJob.run("jrj_news_topic", recover=False)
     elif args.action == "news_content" and args.source == "jrj":
-        BasicJob.run_jrj_news_content()
+        BasicJob.run("jrj_news_content", num=100 if args.num is None else args.num)
     elif args.action == "news_topic" and args.source == "tushare":
-        BasicJob.run_tushare_news_topic()
+        BasicJob.run("tushare_news_topic", num=100 if args.num is None else args.num)
     elif args.action == "news_content" and args.source == "tushare":
-        BasicJob.run_tushare_news_content()
+        BasicJob.run("tushare_news_content", num=100 if args.num is None else args.num)
 
     logging.info("mission complete.")

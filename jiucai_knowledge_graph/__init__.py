@@ -2,7 +2,7 @@ import logging
 
 MONGODB_HOST = "master"
 MONGODB_PORT = 17585
-MONGODB_DB = "jiucai"
+MONGODB_DB = "skg"
 ZK_HOST = "master:2181"
 ZK_ROOT = "/skg/"
 

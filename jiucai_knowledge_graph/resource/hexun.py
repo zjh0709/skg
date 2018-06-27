@@ -11,7 +11,10 @@ def get_chain_topic() -> tuple:
     Link = namedtuple("Link", "head link tail source")
     index_url = "http://industry.hexun.com/index.aspx"
     industry_url = "http://industry.hexun.com/data/jsondata/leftNav.ashx?industry={}&type=0"
-    r = requests.get(index_url)
+    headers = {
+        "User-Agent": "Mozilla/4.0 (compatible; MSIE7.0; WindowsNT5.1; Maxthon2.0)"
+    }
+    r = requests.get(index_url, headers=headers)
     r.encoding = "gbk"
     soup = BeautifulSoup(r.text, "html.parser")
     for dt in soup.find_all("dt", type="0"):
@@ -37,7 +40,10 @@ def get_chain_content(d: dict) -> tuple:
     Link = namedtuple("Link", "head link tail source")
     upstream, downstream = [], []
     url = "http://industry.hexun.com/{}"
-    r = requests.get(url.format(d["href"]))
+    headers = {
+        "User-Agent": "Mozilla/4.0 (compatible; MSIE7.0; WindowsNT5.1; Maxthon2.0)"
+    }
+    r = requests.get(url.format(d["href"]), headers=headers)
     r.encoding = "gbk"
     soup = BeautifulSoup(r.text, "html.parser")
     left = soup.find(class_="sidebar_left")

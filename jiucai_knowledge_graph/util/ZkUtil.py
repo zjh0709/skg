@@ -40,6 +40,8 @@ class ZkUtil(object):
         if isinstance(value, int):
             value = str(value)
         if self.zk.client_state == KeeperState.CONNECTED:
+            if self.zk.exists(path):
+                self.zk.delete(path, recursive=True)
             self.zk.create(path=path, value=value.encode(), ephemeral=True, makepath=True)
 
     def delete(self, path):

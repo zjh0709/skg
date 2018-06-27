@@ -1,5 +1,4 @@
 import tushare as ts
-import datetime
 from collections import namedtuple
 
 
@@ -47,4 +46,4 @@ def get_news_content(url: str) -> dict:
 
 
 if __name__ == '__main__':
-    print(get_news_content('http://finance.sina.com.cn/stock/marketresearch/2018-06-14/doc-ihcwpcmr0207793.shtml'))
+    print(get_news_topic(100))
