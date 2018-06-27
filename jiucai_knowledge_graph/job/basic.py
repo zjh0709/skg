@@ -40,7 +40,8 @@ class BasicJob(object):
         self.counter += len(data)
         self.zk_util.stop()
 
-    def tushare_news_topic(self, num: int):
+    def tushare_news_topic(self):
+        num = 5000
         articles = tu.get_news_topic(num)
         self.zk_util.create(self.zk_total_path, num)
         with ThreadPoolExecutor(max_workers=self.threading_num_low) as executor:
@@ -48,10 +49,9 @@ class BasicJob(object):
         self.counter += num
         self.zk_util.stop()
 
-    def tushare_news_content(self, num: int):
+    def tushare_news_content(self):
         articles = self.data_util.get_articles(where={"source": "tu", "type": "news", "content": {"$exists": False}},
-                                               filed={"_id": 0, "url": 1},
-                                               limit=num)
+                                               filed={"_id": 0, "url": 1})
         self.zk_util.create(self.zk_total_path, len(articles))
 
         def run_one(article: dict):
@@ -129,10 +129,9 @@ class BasicJob(object):
             executor.map(run_one, stocks)
         self.zk_util.stop()
 
-    def jrj_report_content(self, num: int):
+    def jrj_report_content(self):
         articles = self.data_util.get_articles(where={"source": "jrj", "type": "report", "content": {"$exists": False}},
-                                               filed={"_id": 0, "url": 1},
-                                               limit=num)
+                                               filed={"_id": 0, "url": 1})
         self.zk_util.create(self.zk_total_path, len(articles))
 
         def run_one(article: dict):
@@ -163,10 +162,9 @@ class BasicJob(object):
             executor.map(run_one, stocks)
         self.zk_util.stop()
 
-    def jrj_news_content(self, num: int):
+    def jrj_news_content(self):
         articles = self.data_util.get_articles(where={"source": "jrj", "type": "news", "content": {"$exists": False}},
-                                               filed={"_id": 0, "url": 1},
-                                               limit=num)
+                                               filed={"_id": 0, "url": 1})
         self.zk_util.create(self.zk_total_path, len(articles))
 
         def run_one(article: dict):
@@ -206,24 +204,19 @@ class BasicJob(object):
         kg.tushare_basic()
 
     @staticmethod
-    def run_tushare_news_topic(num: int):
+    def run_tushare_news_topic():
         kg = BasicJob("tushare_news_topic")
-        kg.tushare_news_topic(num)
+        kg.tushare_news_topic()
 
     @staticmethod
-    def run_tushare_news_content(num: int):
+    def run_tushare_news_content():
         kg = BasicJob("tushare_news_content")
-        kg.tushare_news_content(num)
+        kg.tushare_news_content()
 
     @staticmethod
     def run_sina_concept():
         kg = BasicJob("sina_concept")
         kg.sina_concept()
-
-    @staticmethod
-    def run_sina_holder():
-        kg = BasicJob("sina_holder")
-        kg.sina_holder()
 
     @staticmethod
     def run_jrj_product():
@@ -241,9 +234,9 @@ class BasicJob(object):
         kg.jrj_report_topic()
 
     @staticmethod
-    def run_jrj_report_content(num: int):
+    def run_jrj_report_content():
         kg = BasicJob("jrj_report_content")
-        kg.jrj_report_content(num)
+        kg.jrj_report_content()
 
     @staticmethod
     def run_jrj_news_topic(recover=False):
@@ -251,9 +244,9 @@ class BasicJob(object):
         kg.jrj_news_topic(recover)
 
     @staticmethod
-    def run_jrj_news_content(num: int):
+    def run_jrj_news_content():
         kg = BasicJob("jrj_news_content")
-        kg.jrj_news_content(num)
+        kg.jrj_news_content()
 
     @staticmethod
     def run_hexun_chain():

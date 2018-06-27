@@ -26,11 +26,15 @@ class JobWatcher(object):
         elif job == "jrj_report_topic":
             BasicJob.run_jrj_report_topic()
         elif job == "jrj_report_content":
-            BasicJob.run_jrj_report_content(10000)
+            BasicJob.run_jrj_report_content()
         elif job == "jrj_news_topic":
             BasicJob.run_jrj_news_topic(False)
         elif job == "jrj_news_content":
-            BasicJob.run_jrj_news_content(10000)
+            BasicJob.run_jrj_news_content()
+        elif job == "tushare_news_topic":
+            BasicJob.run_tushare_news_topic()
+        elif job == "tushare_news_content":
+            BasicJob.run_tushare_news_content()
         else:
             pass
 
@@ -52,6 +56,8 @@ class JobWatcher(object):
                     os.kill(os.getpid(), signal.SIGKILL)
                     exit("{} complete.".format(job))
                 else:
+                    if self.zk_util.exists(self.zk_pid_path + "/" + job):
+                        self.zk_util.delete(self.zk_pid_path + "/" + job)
                     self.zk_util.create_ephemeral(self.zk_pid_path + "/" + job, pid)
 
         @self.zk_util.client.ChildrenWatch(self.zk_stop_path)

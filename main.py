@@ -26,11 +26,11 @@ if __name__ == "__main__":
     elif args.action == "report_topic" and args.source == "jrj":
         BasicJob.run_jrj_report_topic()
     elif args.action == "report_content" and args.source == "jrj":
-        BasicJob.run_jrj_report_content(int(args.num) if args.num is not None else 20)
+        BasicJob.run_jrj_report_content()
     elif args.action == "news_topic" and args.source == "jrj":
-        BasicJob.run_jrj_news_topic(args.num is not None)
+        BasicJob.run_jrj_news_topic()
     elif args.action == "news_content" and args.source == "jrj":
-        BasicJob.run_jrj_news_content(int(args.num) if args.num is not None else 20)
+        BasicJob.run_jrj_news_content()
     elif args.action == "news_topic" and args.source == "tushare":
         # noinspection PyCallByClass
         BasicJob.tushare_news_topic(int(args.num) if args.num is not None else 1000)
