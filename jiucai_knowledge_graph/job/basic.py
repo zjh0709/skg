@@ -18,13 +18,17 @@ class BasicJob(object):
         self.threading_num_low = 2
         self.threading_num_high = 6
         if self.zk_util.exists(self.zk_status_path):
-            self.zk_util.stop()
+            self.quit()
             logging.info("the last job is still running.")
             logging.info("will kill this application, pid {}".format(os.getpid()))
             os.kill(os.getpid(), signal.SIGKILL)
         else:
             self.zk_util.create_ephemeral(self.zk_status_path, "running")
         self.counter = self.zk_util.counter(self.zk_counter_path)
+
+    def quit(self):
+        self.zk_util.delete(self.zk_status_path)
+        self.zk_util.stop()
 
     def tu_basic(self) -> None:
         nodes, links, data = tu.get_stock_basic()
@@ -38,14 +42,14 @@ class BasicJob(object):
         with ThreadPoolExecutor(max_workers=self.threading_num_low) as executor:
             executor.map(self.data_util.save_info, data)
         self.counter += len(data)
-        self.zk_util.stop()
+        self.quit()
 
     def tu_news_topic(self, num: int):
         articles = tu.get_news_topic(num)
 
         if not articles:
             logging.warning("data is None.")
-            self.zk_util.stop()
+            self.quit()
             return None
         self.zk_util.create(self.zk_total_path, len(articles))
 
@@ -55,7 +59,7 @@ class BasicJob(object):
 
         with ThreadPoolExecutor(max_workers=self.threading_num_low) as executor:
             executor.map(run_one, articles)
-        self.zk_util.stop()
+        self.quit()
 
     def tu_news_content(self, num: int):
         articles = self.data_util.get_articles(where={"source": "tu", "type": "news", "content": {"$exists": False}},
@@ -70,7 +74,7 @@ class BasicJob(object):
 
         with ThreadPoolExecutor(max_workers=self.threading_num_high) as executor:
             executor.map(run_one, articles)
-        self.zk_util.stop()
+        self.quit()
 
     def sina_concept(self):
         stocks = self.data_util.get_stocks()
@@ -86,7 +90,7 @@ class BasicJob(object):
 
         with ThreadPoolExecutor(max_workers=self.threading_num_low) as executor:
             executor.map(run_one, stocks)
-        self.zk_util.stop()
+        self.quit()
 
     def jrj_product(self):
         stocks = self.data_util.get_stocks()
@@ -102,7 +106,7 @@ class BasicJob(object):
 
         with ThreadPoolExecutor(max_workers=self.threading_num_high) as executor:
             executor.map(run_one, stocks)
-        self.zk_util.stop()
+        self.quit()
 
     def jrj_holder(self):
         stocks = self.data_util.get_stocks()
@@ -118,7 +122,7 @@ class BasicJob(object):
 
         with ThreadPoolExecutor(max_workers=self.threading_num_high) as executor:
             executor.map(run_one, stocks)
-        self.zk_util.stop()
+        self.quit()
 
     def jrj_report_topic(self):
         stocks = self.data_util.get_stocks()
@@ -136,7 +140,7 @@ class BasicJob(object):
 
         with ThreadPoolExecutor(max_workers=self.threading_num_high) as executor:
             executor.map(run_one, stocks)
-        self.zk_util.stop()
+        self.quit()
 
     def jrj_report_content(self, num: int):
         articles = self.data_util.get_articles(where={"source": "jrj", "type": "report", "content": {"$exists": False}},
@@ -151,7 +155,7 @@ class BasicJob(object):
 
         with ThreadPoolExecutor(max_workers=self.threading_num_high) as executor:
             executor.map(run_one, articles)
-        self.zk_util.stop()
+        self.quit()
 
     def jrj_news_topic(self, recover=False):
         stocks = self.data_util.get_stocks()
@@ -170,7 +174,7 @@ class BasicJob(object):
 
         with ThreadPoolExecutor(max_workers=self.threading_num_high) as executor:
             executor.map(run_one, stocks)
-        self.zk_util.stop()
+        self.quit()
 
     def jrj_news_content(self, num: int):
         articles = self.data_util.get_articles(where={"source": "jrj", "type": "news", "content": {"$exists": False}},
@@ -185,7 +189,7 @@ class BasicJob(object):
 
         with ThreadPoolExecutor(max_workers=self.threading_num_high) as executor:
             executor.map(run_one, articles)
-        self.zk_util.stop()
+        self.quit()
 
     def hexun_chain(self):
         nodes, links, data = hexun.get_chain_topic()
@@ -207,7 +211,7 @@ class BasicJob(object):
 
         with ThreadPoolExecutor(max_workers=self.threading_num_high) as executor:
             executor.map(run_one, data)
-        self.zk_util.stop()
+        self.quit()
 
     @staticmethod
     def run(job_name, **kwargs):
