@@ -39,5 +39,9 @@ if __name__ == "__main__":
         BasicJob.run("tu_news_topic", num=100 if args.num is None else args.num)
     elif args.action == "news_content" and args.source == "tu":
         BasicJob.run("tu_news_content", num=100 if args.num is None else args.num)
+    elif args.action == "report_topic" and args.source == "sina":
+        BasicJob.run("sina_report_topic", recover=True)
+    elif args.action == "report_content" and args.source == "sina":
+        BasicJob.run("sina_report_content", num=100 if args.num is None else args.num)
 
     logging.info("mission complete.")

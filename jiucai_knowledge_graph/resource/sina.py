@@ -16,13 +16,14 @@ def get_report_topic(code: str, page: int = 1) -> tuple:
     r.encoding = "gb2312"
     soup = BeautifulSoup(r.text, "html.parser")
     links_div = soup.find_all("a", href=url_expr)
-    links = []
+    articles = []
     for link in links_div:
-        link = {"url": link.get("href"),
-                "title": link.get("title"),
-                "code": code,
-                "source": "sina"}
-        links.append(link)
+        article = {"url": link.get("href"),
+                   "title": link.get("title"),
+                   "code": code,
+                   "type": "report",
+                   "source": "sina"}
+        articles.append(article)
     page_buttons = soup.find_all("a", onclick=re.compile("set_page_num"))
     max_page = 1
     if page_buttons:
@@ -31,7 +32,7 @@ def get_report_topic(code: str, page: int = 1) -> tuple:
         re_result = re_page_num.search(last_onclick)
         if re_result:
             max_page = int(re_result.group())
-    return links, max_page
+    return articles, max_page
 
 
 def get_report_content(url: str) -> dict:
@@ -40,24 +41,24 @@ def get_report_content(url: str) -> dict:
     }
     r = requests.get(url, headers=headers)
     r.encoding = "gb2312"
-    ret = {}
+    article = {"url": url}
     try:
         soup = BeautifulSoup(r.text, "html.parser")
         content_select = soup.find("div", class_="content")
         if content_select:
             title_select = content_select.find("h1")
             if title_select:
-                ret.setdefault("title", title_select.text)
+                article.setdefault("title", title_select.text)
             creab_select = content_select.find("div", class_="creab")
             if creab_select:
-                ret.setdefault("span", [e.text for
-                                        e in creab_select.findAll("span")])
+                article.setdefault("span", [ele.text for ele in creab_select.findAll("span")])
             document_select = content_select.find("div", class_="blk_container")
             if document_select:
-                ret.setdefault("content", document_select.text.strip())
+                article.setdefault("content", document_select.text.strip())
     except Exception as e:
         logging.warning(e)
-    return ret
+        article.setdefault("content", "--")
+    return article
 
 
 def get_concept(code: str) -> list:
@@ -85,4 +86,4 @@ def get_concept(code: str) -> list:
 
 
 if __name__ == '__main__':
-    print(get_concept("300345"))
+    print(get_report_content("http://vip.stock.finance.sina.com.cn/q/go.php/vReport_Show/kind/search/rptid/3599724/index.phtml"))

@@ -92,6 +92,40 @@ class BasicJob(object):
             executor.map(run_one, stocks)
         self.quit()
 
+    def sina_report_topic(self, recover=False):
+        stocks = self.data_util.get_stocks()
+        self.zk_util.create(self.zk_total_path, len(stocks))
+
+        def run_one(code: str):
+            articles, max_page = sina.get_news_topic(code, 1)
+            for article in articles:
+                self.data_util.save_article(article)
+            if recover is True and max_page > 1:
+                for i in range(2, max_page + 1):
+                    articles, _ = sina.get_news_topic(code, i)
+                    for article in articles:
+                        self.data_util.save_article(article)
+            self.counter += 1
+
+        with ThreadPoolExecutor(max_workers=self.threading_num_high) as executor:
+            executor.map(run_one, stocks)
+        self.quit()
+
+    def sina_report_content(self, num: int):
+        articles = self.data_util.get_articles(where={"source": "sina", "type": "report", "content": {"$exists": False}},
+                                               filed={"_id": 0, "url": 1},
+                                               limit=num)
+        self.zk_util.create(self.zk_total_path, len(articles))
+
+        def run_one(article: dict):
+            content = sina.get_report_content(article["url"])
+            self.data_util.save_article(content)
+            self.counter += 1
+
+        with ThreadPoolExecutor(max_workers=self.threading_num_high) as executor:
+            executor.map(run_one, articles)
+        self.quit()
+
     def jrj_product(self):
         stocks = self.data_util.get_stocks()
         self.zk_util.create(self.zk_total_path, len(stocks))
