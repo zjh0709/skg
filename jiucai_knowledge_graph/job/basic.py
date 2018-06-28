@@ -1,6 +1,7 @@
 import os
 import signal
 import logging
+
 from jiucai_knowledge_graph import ZK_ROOT
 from jiucai_knowledge_graph.util.DataUtil import DataUtil
 from jiucai_knowledge_graph.util.ZkUtil import ZkUtil
@@ -15,12 +16,14 @@ class BasicJob(object):
         self.zk_status_path = ZK_ROOT + "job/" + job_name + "/status"
         self.zk_total_path = ZK_ROOT + "job/" + job_name + "/total"
         self.zk_counter_path = ZK_ROOT + "job/" + job_name + "/counter"
-        self.threading_num_low = 2
-        self.threading_num_high = 6
+        self.threading_num_low = 3
+        self.threading_num_high = 10
         if self.zk_util.exists(self.zk_status_path):
             self.quit()
             logging.info("the last job is still running.")
             logging.info("will kill this application, pid {}".format(os.getpid()))
+            exit(0)
+
             os.kill(os.getpid(), signal.SIGKILL)
         else:
             self.zk_util.create_ephemeral(self.zk_status_path, "running")
@@ -97,12 +100,12 @@ class BasicJob(object):
         self.zk_util.create(self.zk_total_path, len(stocks))
 
         def run_one(code: str):
-            articles, max_page = sina.get_news_topic(code, 1)
+            articles, max_page = sina.get_report_topic(code, 1)
             for article in articles:
                 self.data_util.save_article(article)
             if recover is True and max_page > 1:
                 for i in range(2, max_page + 1):
-                    articles, _ = sina.get_news_topic(code, i)
+                    articles, _ = sina.get_report_topic(code, i)
                     for article in articles:
                         self.data_util.save_article(article)
             self.counter += 1
