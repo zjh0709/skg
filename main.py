@@ -17,8 +17,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     logging.info("mission start.")
-    if args.action == "basic" and args.source == "tushare":
-        BasicJob.run("tushare_basic")
+    if args.action == "basic" and args.source == "tu":
+        BasicJob.run("tu_basic")
     elif args.action == "concept" and args.source == "sina":
         BasicJob.run("sina_concept")
     elif args.action == "holder" and args.source == "jrj":
@@ -35,9 +35,9 @@ if __name__ == "__main__":
         BasicJob.run("jrj_news_topic", recover=False)
     elif args.action == "news_content" and args.source == "jrj":
         BasicJob.run("jrj_news_content", num=100 if args.num is None else args.num)
-    elif args.action == "news_topic" and args.source == "tushare":
-        BasicJob.run("tushare_news_topic", num=100 if args.num is None else args.num)
-    elif args.action == "news_content" and args.source == "tushare":
-        BasicJob.run("tushare_news_content", num=100 if args.num is None else args.num)
+    elif args.action == "news_topic" and args.source == "tu":
+        BasicJob.run("tu_news_topic", num=100 if args.num is None else args.num)
+    elif args.action == "news_content" and args.source == "tu":
+        BasicJob.run("tu_news_content", num=100 if args.num is None else args.num)
 
     logging.info("mission complete.")

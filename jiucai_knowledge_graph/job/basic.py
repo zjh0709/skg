@@ -26,7 +26,7 @@ class BasicJob(object):
             self.zk_util.create_ephemeral(self.zk_status_path, "running")
         self.counter = self.zk_util.counter(self.zk_counter_path)
 
-    def tushare_basic(self) -> None:
+    def tu_basic(self) -> None:
         nodes, links, data = tu.get_stock_basic()
         self.zk_util.create(self.zk_total_path, len(nodes) + len(links) + len(data))
         with ThreadPoolExecutor(max_workers=self.threading_num_low) as executor:
@@ -40,7 +40,7 @@ class BasicJob(object):
         self.counter += len(data)
         self.zk_util.stop()
 
-    def tushare_news_topic(self, num: int):
+    def tu_news_topic(self, num: int):
         articles = tu.get_news_topic(num)
 
         if not articles:
@@ -50,15 +50,14 @@ class BasicJob(object):
         self.zk_util.create(self.zk_total_path, len(articles))
 
         def run_one(article: dict):
-            content = tu.get_news_content(article["url"])
-            self.data_util.save_article(content)
+            self.data_util.save_article(article)
             self.counter += 1
 
-        with ThreadPoolExecutor(max_workers=self.threading_num_high) as executor:
+        with ThreadPoolExecutor(max_workers=self.threading_num_low) as executor:
             executor.map(run_one, articles)
         self.zk_util.stop()
 
-    def tushare_news_content(self, num: int):
+    def tu_news_content(self, num: int):
         articles = self.data_util.get_articles(where={"source": "tu", "type": "news", "content": {"$exists": False}},
                                                filed={"_id": 0, "url": 1},
                                                limit=num)
@@ -216,4 +215,4 @@ class BasicJob(object):
 
 
 if __name__ == '__main__':
-    BasicJob.run("tushare_news_topic", num=10)
+    BasicJob.run("tu_news_topic", num=10)

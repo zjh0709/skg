@@ -26,14 +26,14 @@ def get_news_topic(code: str, page: int = 1) -> tuple:
     r.encoding = "gbk"
     soup = BeautifulSoup(r.text, "html.parser")
     links_div = soup.find_all("a", href=url_expr)
-    links = []
+    articles = []
     for link in links_div:
-        link = {"url": link.get("href"),
-                "title": link.text,
-                "code": code,
-                "source": "jrj",
-                "type": "news"}
-        links.append(link)
+        article = {"url": link.get("href"),
+                   "title": link.text,
+                   "code": code,
+                   "source": "jrj",
+                   "type": "news"}
+        articles.append(article)
     page_buttons = soup.find_all("a", href=re.compile("ggxw_\d+.shtml"))
     max_page = 1
     patt = re.compile("(?<=ggxw_)\d+(?=.shtml)")
@@ -46,13 +46,13 @@ def get_news_topic(code: str, page: int = 1) -> tuple:
     except Exception as e:
         logging.warning(e)
         pass
-    return links, max_page
+    return articles, max_page
 
 
 def get_news_content(url: str) -> dict:
     r = requests.get(url)
     r.encoding = "gbk"
-    data = {"url": url}
+    article = {"url": url}
     try:
         soup = BeautifulSoup(r.text, "html.parser")
         content_div = soup.find("div", class_="texttit_m1")
@@ -61,15 +61,15 @@ def get_news_content(url: str) -> dict:
             if "class" not in d.attrs:
                 content += d.text.strip()
         if content != "":
-            data.setdefault("content", content)
+            article.setdefault("content", content)
     except Exception as e:
         e.__traceback__
-        data.setdefault("content", "--")
-    return data
+        article.setdefault("content", "--")
+    return article
 
 
 def get_report_topic(code: str) -> tuple:
-    nodes, links, topics = [], [], []
+    nodes, links, articles = [], [], []
     Node = namedtuple("Node", "name type source")
     Link = namedtuple("Link", "head link tail source")
     topic_url = "http://stock.jrj.com.cn/action/yanbao/getJiGouGongSiYanBao.jspa?dateInterval=3650&stockCode={}" \
@@ -84,9 +84,9 @@ def get_report_topic(code: str) -> tuple:
         r.encoding = "utf-8"
         data = json.loads(r.text.strip().lstrip("var yanbaolist=").rstrip(";"))
         for d in data["data"]:
-            topics.append({"declare_date": d[0], "code": d[1], "name": d[2],
-                          "title": d[5], "analyst": d[6], "url": url_format.format(d[7]),
-                          "cs_name": d[9], "source": "jrj", "type": "report"})
+            articles.append({"declare_date": d[0], "code": d[1], "name": d[2],
+                             "title": d[5], "analyst": d[6], "url": url_format.format(d[7]),
+                             "cs_name": d[9], "source": "jrj", "type": "report"})
             nodes.append(Node(d[15], "行业", "jrj"))
             if isinstance(d[16], list):
                 for c, n in d[16]:
@@ -96,24 +96,24 @@ def get_report_topic(code: str) -> tuple:
         logging.warning(e)
     nodes = list(set(nodes))
     links = list(set(links))
-    return nodes, links, topics
+    return nodes, links, articles
 
 
 def get_report_content(url: str) -> dict:
     r = requests.get(url)
     r.encoding = "gb2312"
-    ret = {"url": url}
+    article = {"url": url}
     try:
         soup = BeautifulSoup(r.text, "html.parser")
         replayContent_div = soup.find("div", id="replayContent")
         if replayContent_div:
             div = replayContent_div.find_all("div", limit=1)
             if div:
-                ret.setdefault("content", div[0].text.strip())
+                article.setdefault("content", div[0].text.strip())
     except Exception as e:
         e.__traceback__
-        ret.setdefault("content", "--")
-    return ret
+        article.setdefault("content", "--")
+    return article
 
 
 def get_product(code: str):
@@ -177,7 +177,7 @@ def get_holder(code: str):
                                               "股份类型": td[5].text,
                                               "股东性质": td[6].text})
                         nodes.append(Node(td[1].text, __recognize_entity(td[1].text), "jrj"))
-                        links.append(Link(code, "股东", company_,  extend_, "jrj"))
+                        links.append(Link(code, "股东", company_, extend_, "jrj"))
             else:
                 continue
     except Exception as e:
@@ -186,4 +186,4 @@ def get_holder(code: str):
 
 
 if __name__ == '__main__':
-    print(get_holder("600597"))
+    print(get_report_content("http://istock.jrj.com.cn/article,yanbao,29871320.html"))
