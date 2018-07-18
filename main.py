@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 import datetime
 import logging
 import sys
-from jiucai_knowledge_graph.job.basic import BasicJob
+from jiucai.job.basic import BasicJob
 
 
 if __name__ == "__main__":
