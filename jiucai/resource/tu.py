@@ -13,6 +13,7 @@ def get_stock_basic() -> list:
     concept_mapper = ts.get_concept_classified().groupby(["code"])["c_name"].apply(lambda x: x.tolist()).to_dict()
     area_mapper = ts.get_area_classified().groupby(["code"])["area"].apply(lambda x: x.tolist()).to_dict()
     for d in data:
+        nodes.append(Node(d["code"], "公司", "tu"))
         nodes.append(Node(d["name"], "公司", "tu"))
         links.append(Link(d["code"], "等于", d["name"], "tu"))
         for k in set(industry_mapper.get(d["code"], []) + [d["industry"]]):

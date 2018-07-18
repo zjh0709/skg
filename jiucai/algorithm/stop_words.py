@@ -1,0 +1,3 @@
+STOP_WORDS = frozenset([
+
+])

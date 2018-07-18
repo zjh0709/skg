@@ -2,10 +2,10 @@ import os
 import signal
 import logging
 
-from jiucai_knowledge_graph import ZK_ROOT
-from jiucai_knowledge_graph.util.DataUtil import DataUtil
-from jiucai_knowledge_graph.util.ZkUtil import ZkUtil
-from jiucai_knowledge_graph.resource import tu, sina, jrj, hexun
+from jiucai import CONFIG
+from jiucai.util.DataUtil import DataUtil
+from jiucai.util.ZkUtil import ZkUtil
+from jiucai.resource import tu, sina, jrj, hexun
 from concurrent.futures import ThreadPoolExecutor
 
 
@@ -13,9 +13,9 @@ class BasicJob(object):
     def __init__(self, job_name: str):
         self.data_util = DataUtil()
         self.zk_util = ZkUtil()
-        self.zk_status_path = ZK_ROOT + "job/" + job_name + "/status"
-        self.zk_total_path = ZK_ROOT + "job/" + job_name + "/total"
-        self.zk_counter_path = ZK_ROOT + "job/" + job_name + "/counter"
+        self.zk_status_path = CONFIG["ZK_ROOT"] + "job/" + job_name + "/status"
+        self.zk_total_path = CONFIG["ZK_ROOT"] + "job/" + job_name + "/total"
+        self.zk_counter_path = CONFIG["ZK_ROOT"] + "job/" + job_name + "/counter"
         self.threading_num_low = 3
         self.threading_num_high = 10
         if self.zk_util.exists(self.zk_status_path):

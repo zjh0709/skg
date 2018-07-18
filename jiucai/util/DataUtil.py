@@ -4,13 +4,15 @@ from collections import namedtuple
 import pymongo
 import time
 
-from jiucai_knowledge_graph import MONGODB_HOST, MONGODB_PORT, MONGODB_DB
+from jiucai import CONFIG
 
 
 class DataUtil(object):
     def __init__(self):
-        self.client = pymongo.MongoClient(host=MONGODB_HOST, port=MONGODB_PORT, connect=False)
-        self.db = self.client.get_database(MONGODB_DB)
+        self.client = pymongo.MongoClient(host=CONFIG["MONGODB_HOST"],
+                                          port=CONFIG["MONGODB_PORT"],
+                                          connect=False)
+        self.db = self.client.get_database(CONFIG["MONGODB_DB"])
 
     def get_stocks(self) -> list:
         stocks = self.db.get_collection("info").find({}, {"_id": 0, "code": 1})
@@ -54,3 +56,25 @@ class DataUtil(object):
                     article,
                     True)
 
+    def load_article(self, where={}, field=None, limit=None):
+        cursor = self.db.get_collection("article").find(where, field)
+        if limit:
+            cursor = cursor.limit(limit)
+        return cursor
+
+    def load_node(self, where={}, field=None, limit=None):
+        cursor = self.db.get_collection("node").find(where, field)
+        if limit:
+            cursor = cursor.limit(limit)
+        return cursor
+
+    def load_link(self, where={}, field=None, limit=None):
+        cursor = self.db.get_collection("link").find(where, field)
+        if limit:
+            cursor = cursor.limit(limit)
+        return cursor
+
+
+if __name__ == '__main__':
+    util = DataUtil()
+    util.load_article(limit=10)

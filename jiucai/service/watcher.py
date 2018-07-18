@@ -1,20 +1,20 @@
-from jiucai_knowledge_graph import ZK_ROOT
-from jiucai_knowledge_graph.job.basic import BasicJob
+from jiucai import CONFIG
+from jiucai.job.basic import BasicJob
 from kazoo.exceptions import NoNodeError
 import logging
 import os
 import signal
 
-from jiucai_knowledge_graph.util.ZkUtil import ZkUtil
+from jiucai.util.ZkUtil import ZkUtil
 
 
 class JobWatcher(object):
     def __init__(self):
         self.zk_util = ZkUtil()
-        self.zk_service_path = ZK_ROOT + "service/job_watcher"
-        self.zk_start_path = ZK_ROOT + "start"
-        self.zk_stop_path = ZK_ROOT + "stop"
-        self.zk_pid_path = ZK_ROOT + "pid"
+        self.zk_service_path = CONFIG["ZK_ROOT"] + "service/job_watcher"
+        self.zk_start_path = CONFIG["ZK_ROOT"] + "start"
+        self.zk_stop_path = CONFIG["ZK_ROOT"] + "stop"
+        self.zk_pid_path = CONFIG["ZK_ROOT"] + "pid"
 
     def runner(self, job: str):
         if job == "tushare_basic":

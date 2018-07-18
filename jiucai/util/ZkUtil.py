@@ -1,4 +1,4 @@
-from jiucai_knowledge_graph import ZK_HOST
+from jiucai import CONFIG
 from kazoo.client import KazooClient
 from kazoo.handlers.threading import KazooTimeoutError
 from kazoo.protocol.states import KeeperState
@@ -6,7 +6,7 @@ from kazoo.protocol.states import KeeperState
 
 class ZkUtil(object):
     def __init__(self):
-        self.zk = KazooClient(hosts=ZK_HOST)
+        self.zk = KazooClient(hosts=CONFIG["ZK_HOST"])
         try:
             self.zk.start()
         except KazooTimeoutError as e:
